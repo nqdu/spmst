@@ -1,0 +1,60 @@
+#include "spm2d.hpp"
+#include <iostream>
+#include <chrono>
+
+static void 
+read_line(char *__restrict__ __s, int __n, FILE *__restrict__ __stream)
+{
+    assert(fgets(__s,__n,__stream) != NULL);
+}
+
+int main(){
+    int nx,nz;
+    float zmin,xmin,zmax,xmax;
+    float dx,dz;
+    float xs,zs; 
+    int nr; 
+    char line[256];
+    FILE *fp = fopen("spmst.in","r");
+    read_line(line,sizeof(line),fp);  read_line(line,sizeof(line),fp);
+    sscanf(line,"%f%f",&xmin,&zmin);
+    read_line(line,sizeof(line),fp);
+    sscanf(line,"%f%f",&xmax,&zmax);
+    read_line(line,sizeof(line),fp);
+    sscanf(line,"%d%d",&nx,&nz);
+    dx = (xmax - xmin) / nx; dz = (zmax - zmin) / nz;
+
+    // source and receiver
+    read_line(line,sizeof(line),fp); read_line(line,sizeof(line),fp);
+    read_line(line,sizeof(line),fp);
+    sscanf(line,"%f%f",&xs,&zs);
+    read_line(line,sizeof(line),fp);
+    sscanf(line,"%d",&nr);
+    float xr[nr],zr[nr];
+    for(int i = 0; i < nr; i++){
+        read_line(line,sizeof(line),fp);
+        sscanf(line,"%f%f",xr+i,zr+i);
+    }
+    fclose(fp);
+
+    // set initial
+    SPM2D spm2d(xmin,zmin,dx,dz,nx,nz);
+    spm2d.veloc.setConstant(3.0);
+
+    // set topography
+    printf("reading topograph ...\n");
+    spm2d.set_topology("topo.dat");
+
+    // locate source and receivers
+    spm2d.locate_source_stations(xs,zs,xr,zr,nr);
+
+    auto start = std::chrono::system_clock::now();
+    spm2d.compute_traveltime();
+    auto end = std::chrono::system_clock::now();
+    auto elapse = std::chrono::duration<float>(end- start);
+    printf("%f\n",elapse.count());
+
+    // save results
+    spm2d.write_timefield("time.out");
+    spm2d.write_raypath("ray.dat");
+}
