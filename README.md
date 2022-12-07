@@ -1,4 +1,4 @@
-# SPM2D Manual
+# SPMST Manual
 ## 1. set topography
 set your topography in `topo.dat`
 ``` shell
