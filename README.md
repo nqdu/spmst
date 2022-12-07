@@ -1,4 +1,4 @@
-# SPMST Manual
+# SPMST: Surface Wave Tomography with Topography
 ## 1. set topography
 set your topography in `topo.dat`
 ``` shell
