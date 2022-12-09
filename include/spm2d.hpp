@@ -35,6 +35,8 @@ private:
     // topography 
     fvec topo_x,topo_y;
     fmat2 topo_z;
+    
+
 public:
 
     SPM2D() {};
