@@ -35,13 +35,14 @@ private:
     // topography 
     fvec topo_x,topo_y;
     fmat2 topo_z;
-    
 
+    // spherical coordinates?
+    bool is_spherical;
 public:
 
     SPM2D() {};
-    SPM2D(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat);
-    void initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat);
+    SPM2D(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph=true);
+    void initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph=true);
     void set_topology(fvec &lon, fvec &lat, fmat2 &topo);
     void set_topology(const char *filename);
     void locate_source_stations(float evlo,float evla,float* restrict stlo,
