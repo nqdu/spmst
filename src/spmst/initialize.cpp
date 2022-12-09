@@ -165,9 +165,11 @@ read_spmst_params(const char *filename)
     fclose(fp);
 
     // allocate space for solver (with more refined grid)
-    float dlon = (lonmax - lonmin) / (nlon * 4 - 4);
-    float dlat = (latmax - latmin) / (nlat * 4 - 4); 
-    spm2dbase.initialize(lonmin,latmin,dlon,dlat,nlon*4 - 4,nlat*4 - 4);
+    const int nrefine = 2;
+    float dlon = (lonmax - lonmin) / ((nlon - 1) * nrefine );
+    float dlat = (latmax - latmin) / ((nlat -1 ) * nrefine); 
+    spm2dbase.initialize(lonmin,latmin,dlon,dlat,
+                        (nlon-1)*nrefine,(nlat - 1) * nrefine);
 }
 
 void SPMST:: 
