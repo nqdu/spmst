@@ -30,6 +30,7 @@ public:
     void set_velocity(const fmat2 &veloc_in,SPM2D &spm2d);
     void read_topography(const char *filename);
     void read_spmst_params(const char *filename);
+    void write_traveltime(const fvec &tsyn,const char *filename) const;
 
     // functions
     void synthetic(const fmat2 &vel,fvec &tsyn);

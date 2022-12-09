@@ -38,19 +38,23 @@ int main(){
     create_directory("models");
     std::string outfile = "models/mod_iter"+ std::to_string(0) +  ".dat";
     save_model(outfile.data(),tomo,vel);
+    tomo.write_traveltime(tomo.tobs,"models/disper_obs.dat");
 
     // now do inversion
     for(int iter = 0; iter < tomo.niters; iter ++){
         printf("\nIteration %d ...\n",iter + 1);
+        printf("computing frechet kernel ...\n");
         tomo.tomography_iter(iter,vel,tsyn);
 
         // rms
         float rms = (tsyn - tomo.tobs).square().sum() / nt;
-        printf("rms for iteration %d: %f\n",iter+1,rms);
+        printf("rms for model %d: %f\n",iter,rms);
 
         // save current model
         outfile = "models/mod_iter"+ std::to_string(iter+1) +  ".dat";
         save_model(outfile.data(),tomo,vel);
+        outfile = "models/disper_iter" + std::to_string(iter) + ".dat";
+        tomo.write_traveltime(tsyn,outfile.data());
     }
     
     // compute travel time for the last iteration
@@ -58,7 +62,8 @@ int main(){
     tomo.synthetic(vel,tsyn);
     float rms = (tsyn - tomo.tobs).square().sum() / nt;
     printf("rms for the final model: %f\n",rms);
-    outfile = "models/mod_iter"+ std::to_string(tomo.niters+1) +  ".dat";
+    outfile = "models/disper_iter" + std::to_string(tomo.niters) + ".dat";
+    tomo.write_traveltime(tsyn,outfile.data());
 
     return 0;
 }
