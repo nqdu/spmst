@@ -3,6 +3,7 @@
 #include "clsqr2.hpp"
 /* lsqr.h
    $Revision: 229 $ $Date: 2006-04-15 18:40:08 -0700 (Sat, 15 Apr 2006) $
+   $Revision: 229 $ $Date: 2022-12-07 by nqdu, C++ version $
 */
 /*!
    \file

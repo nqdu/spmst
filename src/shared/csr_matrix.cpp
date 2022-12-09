@@ -62,8 +62,15 @@ read(const char *filename)
     }
 }
 
+/**
+ * @brief solve sparse linear system Ax = b by lsqr method
+ * 
+ * @param b residual vector
+ * @param x unknowns
+ * @param dict LSQR dict
+ */
 void csr_matrix::
-lsqr_solver(const float* restrict b, float* restrict x,LSQRDict &dict)
+lsqr_solver(const float* restrict b, float* restrict x,LSQRDict &dict) const
 {
     // initialize x 
     for(int i = 0; i < MATRIX_COL; i++) x[i] = 0.0;
@@ -72,10 +79,12 @@ lsqr_solver(const float* restrict b, float* restrict x,LSQRDict &dict)
          &dict.anorm,&dict.acond,&dict.rnorm,&dict.arnorm,&dict.xnorm);
 }
 
-int csr_matrix:: rows(){
+int csr_matrix:: rows() const
+{
     return MATRIX_ROW;
 }
 
-int csr_matrix:: cols(){
+int csr_matrix:: cols() const
+{
     return MATRIX_COL;
 }

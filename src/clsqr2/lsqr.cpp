@@ -12,6 +12,7 @@
 
                 The stopping rules were slightly altered in that version.
                 They have been restored to the original rules used in the f77 LSQR.
+    07 Dec 2022: c++ version by nqdu
 */
 
 #include <stdlib.h>

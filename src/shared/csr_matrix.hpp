@@ -57,12 +57,12 @@ public:
     // destructor
     ~csr_matrix();
 
-    void lsqr_solver(const float* restrict b, float * restrict x,LSQRDict &dict);
+    void lsqr_solver(const float* restrict b, float * restrict x,LSQRDict &dict) const;
 
     void read(const char* filename);
 
-    int rows();
-    int cols();
+    int rows() const;
+    int cols() const;
 }; 
 
 #endif
