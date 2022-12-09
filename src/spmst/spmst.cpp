@@ -1,6 +1,10 @@
 #include "spmst.hpp"
 #include "shared/bilinear.hpp"
 #include "shared/csr_matrix.hpp"
+#include <fstream>
+#include <omp.h>
+
+const int USER_OMP_NUM_THREADS = 4;
 
 /**
  * @brief compute synthetic data for current model
@@ -14,22 +18,57 @@ synthetic(const fmat2 &vel,fvec &tsyn)
     // interpolate velocity to spm2d mesh
     set_velocity(vel,spm2dbase);
 
-    int num = 0;
+    // set data index
+    std::vector<int> data_idx(nevents);
+    data_idx[0] = 0;
+    for(int ievt = 1; ievt < nevents; ievt++){
+        data_idx[ievt] = data_idx[ievt-1] + nrecvs_per_event[ievt-1];
+    }
+
+    omp_set_num_threads(USER_OMP_NUM_THREADS);
+    #pragma omp parallel for shared(data_idx,spm2dbase)
     for(int ievt = 0; ievt < nevents; ievt ++){
         SPM2D spm2d = spm2dbase;
         spm2d.locate_source_stations(evlon[ievt],evlat[ievt],&stalon(ievt,0),
                                      &stalat(ievt,0),nrecvs_per_event[ievt]);
         spm2d.compute_traveltime();
+        int num = data_idx[ievt];
         for(int ir = 0; ir < nrecvs_per_event[ievt]; ir++){
             tsyn[num + ir] = spm2d.ttime_recv[ir];
         }
-        num += nrecvs_per_event[ievt];
+    }
+}
 
-        // char filename[100];
-        // sprintf(filename,"time%d.out",ievt);
-        // spm2d.write_timefield(filename);
-        //printf("event %d is finished\n",ievt);
-
+/**
+ * @brief merge frechet kernel for all procs into a single file
+ * 
+ * @param outfile 
+ */
+static void 
+merge_frechet_kernel(const char *outfile)
+{
+    char filename[256];
+    const int nprocs = USER_OMP_NUM_THREADS;
+    if(nprocs != 1){
+        FILE *fp,*fpout;
+        char line[128];
+        fpout = fopen(outfile,"w");
+        for(int irank = 0; irank < nprocs; irank ++){
+            sprintf(filename,"%s.%d.txt",outfile,irank);
+            fp = fopen(filename,"r");
+            while(fgets(line,sizeof(line),fp) != NULL){
+                fputs(line,fpout);
+            }
+            fclose(fp);
+            
+            // remove this file
+            std::remove(filename);
+        }
+        fclose(fpout);
+    }
+    else{
+        sprintf(filename,"%s.%d.txt",outfile,0);
+        std::rename(filename,outfile);
     }
 }
 
@@ -43,15 +82,18 @@ synthetic(const fmat2 &vel,fvec &tsyn)
  */
 std::vector<int> SPMST::
 compute_frechet(const fmat2 &vel,fvec &tsyn,const char *outfile)
-{
-    FILE *fp = fopen(outfile,"w"); // open outfile to write out frechet kernel
-    
+{    
     // interpolate velocity to spm2d mesh
     set_velocity(vel,spm2dbase);
 
+    // set data index
+    std::vector<int> data_idx(nevents);
+    data_idx[0] = 0;
+    for(int ievt = 1; ievt < nevents; ievt++){
+        data_idx[ievt] = data_idx[ievt-1] + nrecvs_per_event[ievt-1];
+    }
+
     // for bilinear interpolation
-    int iy,ix;
-    float coef[4];
     float lon[nlon],lat[nlat];
     for(int i = 0; i < nlon; i++){
         lon[i] = lonmin + (lonmax - lonmin) / (nlon - 1) * i;
@@ -60,52 +102,88 @@ compute_frechet(const fmat2 &vel,fvec &tsyn,const char *outfile)
         lat[i] = latmin + (latmax - latmin) / (nlat - 1) * i;
     }
 
+    // # nonzeros in 
     int nt = tobs.size();
     std::vector<int> nonzeros(nt);
-    int num = 0;
-    fvec fdm0(spm2dbase.nptstot);
-    fmat2 fdm(nlat,nlon);
-    for(int ievt = 0; ievt < nevents; ievt ++){
-        SPM2D spm2d = spm2dbase;
-        spm2d.locate_source_stations(evlon[ievt],evlat[ievt],&stalon(ievt,0),
-                                     &stalat(ievt,0),nrecvs_per_event[ievt]);
-        spm2d.compute_traveltime();
-        for(int ir = 0; ir < nrecvs_per_event[ievt]; ir++){
-            tsyn[num + ir] = spm2d.ttime_recv[ir];
-        }
 
-        // frechet kernel
-        for(int ir = 0; ir < nrecvs_per_event[ievt]; ir++){
-            spm2d.frechet_kernel(ir,fdm0);
-            //printf("%f\n",fdm0.sum());
-            fdm.setConstant(0);
-            for(int inode = 0; inode < spm2d.nptstot; inode ++){
-                float x = spm2d.xstore[inode], y = spm2d.ystore[inode];
-                float term = fdm0[inode];
-                if(std::abs(term) > 0.0 ){
-                    bilinear(lon,lat,nlon,nlat,x,y,ix,iy,coef);
-                    for(int i = 0; i < 2; i++){
-                    for(int j = 0; j < 2; j++){
-                        fdm(iy+i,ix+j) += term * coef[i*2+j];
-                    }}
-                }
+    omp_set_num_threads(USER_OMP_NUM_THREADS);
+    #pragma omp parallel for shared(data_idx,spm2dbase,lon,lat,nonzeros)
+    for(int myrank = 0; myrank < USER_OMP_NUM_THREADS; myrank ++){
+        fvec fdm0(spm2dbase.nptstot);
+        fmat2 fdm(nlat,nlon);
+        SPM2D spm2d = spm2dbase;
+
+        // open outfile to write out frechet kernel
+        char filename[100];
+        sprintf(filename,"%s.%d.txt",outfile,myrank);
+        FILE *fp = fopen(filename,"w"); 
+
+        // allocate jobs to each rank
+        int sub_n = nevents / USER_OMP_NUM_THREADS;
+        int num_larger_procs = nevents - USER_OMP_NUM_THREADS * sub_n;
+        int start,end;
+        if (myrank < num_larger_procs){ sub_n = sub_n + 1;
+            start = 0 + myrank * sub_n;
+        }
+        else if (sub_n > 0){ 
+            start = 0 + num_larger_procs + myrank * sub_n;
+        }
+        else { // this process has only zero elements
+            start = -1;
+            sub_n = 0;
+        }
+        end = start + sub_n - 1;
+
+        // loop every event in this proc
+        for(int ievt = start; ievt <= end; ievt ++){
+            int num = data_idx[ievt];
+
+            // compute travel time
+            spm2d.locate_source_stations(evlon[ievt],evlat[ievt],&stalon(ievt,0),
+                                        &stalat(ievt,0),nrecvs_per_event[ievt]);
+            spm2d.compute_traveltime();
+            for(int ir = 0; ir < nrecvs_per_event[ievt]; ir++){
+                tsyn[num + ir] = spm2d.ttime_recv[ir];
             }
 
-            // write out
-            int nar = (fdm.abs() > 0.0).cast<int>().sum();
-            fprintf(fp,"# %d %d\n",num+ir,nar);
-            for(int i = 0; i < nlat; i++){
-            for(int j = 0; j< nlon; j++){
-                if(abs(fdm(i,j)) > 0.0){
-                    fprintf(fp,"%d %g\n",i*nlon+j,fdm(i,j));
+            // frechet kernel
+            for(int ir = 0; ir < nrecvs_per_event[ievt]; ir++){
+                spm2d.frechet_kernel(ir,fdm0);
+                //printf("%f\n",fdm0.sum());
+                fdm.setConstant(0);
+                for(int inode = 0; inode < spm2d.nptstot; inode ++){
+                    float x = spm2d.xstore[inode], y = spm2d.ystore[inode];
+                    float term = fdm0[inode];
+                    if(std::abs(term) > 0.0 ){
+                        int iy,ix;
+                        float coef[4];
+                        bilinear(lon,lat,nlon,nlat,x,y,ix,iy,coef);
+                        for(int i = 0; i < 2; i++){
+                        for(int j = 0; j < 2; j++){
+                            fdm(iy+i,ix+j) += term * coef[i*2+j];
+                        }}
+                    }
                 }
-            }}  
-            nonzeros[num+ir] = nar;
+
+                // write out
+                int nar = (fdm.abs() > 0.0).cast<int>().sum();
+                fprintf(fp,"# %d %d\n",num+ir,nar);
+                for(int i = 0; i < nlat; i++){
+                for(int j = 0; j< nlon; j++){
+                    if(std::abs(fdm(i,j)) > 0.0){
+                        fprintf(fp,"%d %g\n",i*nlon+j,fdm(i,j));
+                    }
+                }}  
+                nonzeros[num+ir] = nar;
+            }
         }
-        num += nrecvs_per_event[ievt];
+
+        // close file;
+        fclose(fp);
     }
 
-    fclose(fp);
+    // merge all files into one file
+    merge_frechet_kernel(outfile);
 
     return nonzeros;
 }
@@ -187,12 +265,6 @@ tomography_iter(int iter,fmat2 &vel,fvec &tsyn)
     // read csr matrix from frechet.out
     smat.read(frechet_file);
     add_regularization_terms(smat,smooth,nlat,nlon);
-
-    // csr_matrix smat(nt,nlat*nlon,nar);
-    // smat.indptr[0] = 0;
-    // for(int i=0;i<nt;i++){
-    //     smat.indptr[i+1] = smat.indptr[i] +  nonzeros[i];
-    // }
 
     // read csr matrix from frechet.out
     smat.read(frechet_file);
