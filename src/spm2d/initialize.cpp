@@ -25,13 +25,13 @@ get_unique(const float* restrict x, const float* restrict z,
     }
 
     // tolerance
-    float xtol = 1.0e-5 * (xmax - xmin);
-    float ztol = 1.0e-5 * (zmax - zmin);
+    double xtol = 1.0e-4 * (xmax - xmin);
+    double ztol = 1.0e-4 * (zmax - zmin);
 
     int nc = 0;
     for(int i = 0; i < n; i ++)index[i] = -1;
 
-    typedef std::tuple<float,float,int> fpair;
+    typedef std::tuple<double,double,int> fpair;
     std::vector<fpair> cords(n);
     for(int i = 0 ; i < n; i++){
         cords[i] = std::make_tuple(x[i],z[i],i);
@@ -105,10 +105,11 @@ get_velocity(float lon,float lat) const
 
 
 SPM2D:: 
-SPM2D(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat)
+SPM2D(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph)
 {
-    this-> initialize(lonmin,latmin,dlon,dlat,nlon,nlat);
+    this-> initialize(lonmin,latmin,dlon,dlat,nlon,nlat,sph);
 }
+
 
 /**
  * @brief initialze SPM2D class
@@ -116,9 +117,10 @@ SPM2D(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat)
  * @param lonmin,latmin mesh lower left point 
  * @param dlon,dlat element size in lon and lat direction
  * @param nlon,nlat # of elements in lon and lat direction 
+ * @param sph = true if it is spherical coordinates
  */
 void SPM2D::
-initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat)
+initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph)
 {
     // allocate space
     nelemx = nlon; nelemy = nlat;
@@ -162,8 +164,17 @@ initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat)
         }
     }}
 
+    int npts = (NPTX - 2) * nelemx * (nelemy + 1) + 
+                (NPTZ-2) * nelemy * (nelemx +1) + 
+                (nelemx + 1) * (nelemy + 1);
+
     // get connectivity matrix and reduce cache missing
     nptstot = get_unique(xmesh.data(),ymesh.data(),ibool.data(),ibool.size());
+    if(npts != nptstot){
+        printf("The threshold in get_unique is not adequate\n");
+        printf("%d %d\n",npts,nptstot);
+        exit(1);
+    }
     get_indirect_connectivity(ibool);
 
     // get coordinates
@@ -179,6 +190,9 @@ initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat)
 
     // resize raypath nodes
     comming_node.resize(nptstot,2);
+
+    // set is_spherical
+    is_spherical = sph;
 }
 
 void SPM2D::
