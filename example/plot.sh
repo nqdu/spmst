@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -e 
 
-file=models/mod_iter6.dat
+file=models/mod_iter10.dat
 line=`gmt gmtinfo $file -C`
 xmin=`echo $line |awk '{print $1}'`
 xmax=`echo $line |awk '{print $2}'`
