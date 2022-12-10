@@ -1,0 +1,13 @@
+# study region
+99.7  25.7 # lonmin latmin
+110.2  35.3  # lonmax latmax
+36 33 #  of elements in lon/lat direction
+1       # use spherical coordinates
+
+# inversion parameters
+20.0 0.1                          # smooth damp
+2.0 4.5                           # minimum velocity, maximum velocity (a priori information)
+10                                # maximum iteration
+
+# synthetic 
+0                           # synthetic data 
