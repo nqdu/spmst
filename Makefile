@@ -6,15 +6,22 @@ EIGEN_INC= -I/mnt/c/linuxapp/eigen-3.4.0
 PARALLEL = -DEIGEN_DONT_PARALLELIZE -fopenmp
 
 # src and obj
-src= $(shell find src/spm2d/*.cpp src/clsqr2/*.cpp src/shared/*.cpp src/spmst/*.cpp )
-obj=$(src:%.cpp=%.o)
+srcbase= $(shell find src/spm2d/*.cpp|grep -v main.cpp) $(shell find src/clsqr2/*.cpp)  \
+	 $(shell find src/shared/*.cpp) $(shell find src/spmst/*.cpp |grep -v main.cpp)
+src1 = $(srcbase) src/spmst/main.cpp
+src2 = $(srcbase) src/spm2d/main.cpp
+obj1 = $(src1:%.cpp=%.o)
+obj2 = $(src2:%.cpp=%.o)
+prog1 = ./bin/tomo
+prog2 = ./bin/travel
 
-out=./bin/tomo
+all: $(prog1) $(prog2)
 
-all: $(out)
+$(prog1):$(obj1)
+	$(CXX) -o $(prog1)  $(obj1) $(LIB_DIR) $(OPT) $(PARALLEL)
 
-$(out):$(obj)
-	$(CXX) -o $(out) $(obj) $(LIB_DIR) $(OPT) $(PARALLEL)
+$(prog2):$(obj2)
+	$(CXX) -o $(prog2)  $(obj2) $(LIB_DIR) $(OPT) $(PARALLEL)
 
 %.o:%.cpp
 	$(CXX) -g -c $(CXXFLAGS) $(EIGEN_INC) $(INCLUDE_DIR) $< -o $@ $(OPT) $(PARALLEL)

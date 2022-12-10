@@ -4,7 +4,7 @@
 #include <fstream>
 #include <omp.h>
 
-const int USER_OMP_NUM_THREADS = 4;
+const int USER_OMP_NUM_THREADS = 8;
 
 /**
  * @brief compute synthetic data for current model
@@ -265,9 +265,6 @@ tomography_iter(int iter,fmat2 &vel,fvec &tsyn)
     // read csr matrix from frechet.out
     smat.read(frechet_file);
     add_regularization_terms(smat,smooth,nlat,nlon);
-
-    // read csr matrix from frechet.out
-    smat.read(frechet_file);
 
     // lsqr solver
     printf("solving linear systems by LSQR ...\n");

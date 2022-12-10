@@ -145,12 +145,25 @@ read_spmst_params(const char *filename)
     sscanf(line,"%f%f",&lonmax,&latmax);
     read_line(line,sizeof(line),fp);
     sscanf(line,"%d%d",&nlon,&nlat);
+    // check if use spherical coordinates
+    int sph;
+    read_line(line,sizeof(line),fp); sscanf(line,"%d",&sph);
+    is_spherical = sph == 1;
 
     // print information
     printf("\nMesh Information:\n");
-    printf("lonmin = %f lonmax = %f\n",lonmin,lonmax);
-    printf("latmin = %f latmax = %f\n",latmin,latmax);
-    printf("nlat = %d nlon = %d\n",nlat,nlon);
+    if(is_spherical){
+        printf("using spherical coordinates ...\n");
+        printf("lonmin = %f lonmax = %f\n",lonmin,lonmax);
+        printf("latmin = %f latmax = %f\n",latmin,latmax);
+        printf("nlat = %d nlon = %d\n",nlat,nlon);
+    }
+    else{
+        printf("using cartesian coordinates ...\n");
+        printf("xmin = %f xmax = %f\n",lonmin,lonmax);
+        printf("ymin = %f ymax = %f\n",latmin,latmax);
+        printf("ny = %d nx = %d\n",nlat,nlon);
+    }
 
     // read lsqr params
     read_line(line,sizeof(line),fp); sscanf(line,"%f%f",&smooth,&damp);
@@ -163,18 +176,6 @@ read_spmst_params(const char *filename)
     do_synthetic = is_syn == 1;
     velinit.resize(nlat,nlon);
     if(do_synthetic) veltrue.resize(nlat,nlon);
-
-    // check if use spherical coordinates
-    int sph;
-    read_line(line,sizeof(line),fp); sscanf(line,"%d",&sph);
-    is_spherical = sph == 1;
-    if(is_spherical){
-        printf("using spherical coordinates ...\n");
-    }
-    else{
-        printf("using cartesian coordinates ...\n");
-    }
-    
 
     fclose(fp);
 

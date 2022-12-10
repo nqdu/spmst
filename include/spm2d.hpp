@@ -3,7 +3,7 @@
 
 #include "numerical.hpp"
 
-const int NPTX = 10,NPTZ = 10, NPT2 = NPTX*2 + NPTZ*2 -4; // # of auxiliary nodes in x and z direction
+const int NPTX = 13,NPTZ = 13, NPT2 = NPTX*2 + NPTZ*2 -4; // # of auxiliary nodes in x and z direction
 const float earth = 6371.0;
 
 class SPM2D{
