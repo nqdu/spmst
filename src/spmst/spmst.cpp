@@ -4,7 +4,7 @@
 #include <fstream>
 #include <omp.h>
 
-const int USER_OMP_NUM_THREADS = 4;
+const int USER_OMP_NUM_THREADS = 8;
 
 /**
  * @brief compute synthetic data for current model

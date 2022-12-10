@@ -13,6 +13,7 @@ public:
     SPM2D spm2dbase; // forward solver
 
     bool do_synthetic; // if do synthetic test
+    bool is_spherical; // if use spherical coordinates
 
 public:
     int nlon,nlat;
@@ -36,6 +37,9 @@ public:
     void synthetic(const fmat2 &vel,fvec &tsyn);
     std::vector<int> compute_frechet(const fmat2 &vel,fvec &tsyn,const char *outfile);
     void tomography_iter(int iter,fmat2 &vel,fvec &tsyn);
+
+    // useful distance function
+    float compute_distance(float x0,float y0,float x1,float y1) const;
 };
 
 #endif

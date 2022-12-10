@@ -48,7 +48,7 @@ int main(){
 
         // rms
         float rms = (tsyn - tomo.tobs).square().sum() / nt;
-        printf("rms for model %d: %f\n",iter,rms);
+        printf("rms for model %d: %g\n",iter,rms);
 
         // save current model
         outfile = "models/mod_iter"+ std::to_string(iter+1) +  ".dat";
@@ -61,7 +61,7 @@ int main(){
     printf("\nsynthetic traveltime for the final model ...\n");
     tomo.synthetic(vel,tsyn);
     float rms = (tsyn - tomo.tobs).square().sum() / nt;
-    printf("rms for the final model: %f\n",rms);
+    printf("rms for the final model: %g\n",rms);
     outfile = "models/disper_iter" + std::to_string(tomo.niters) + ".dat";
     tomo.write_traveltime(tsyn,outfile.data());
 

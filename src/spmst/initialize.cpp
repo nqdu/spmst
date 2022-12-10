@@ -1,6 +1,5 @@
 #include "spmst.hpp"
 #include "shared/bilinear.hpp"
-#include "shared/gps2dist.hpp"
 #include <iostream>
 
 /**
@@ -53,9 +52,12 @@ read_obsdata(const char *filename)
         sscanf(line,"%c%f%f%d",&dummy,&evlon[ievt],&evlat[ievt],&nrecvs_per_event[ievt]);
         for(int ir = 0; ir < nrecvs_per_event[ievt]; ir++){
             assert(fgets(line,sizeof(line),fp) != NULL);
-            float v0;
+            float v0,dist;
             sscanf(line,"%f%f%f",&stalon(ievt,ir),&stalat(ievt,ir),&v0);
-            tobs[ndata] = gps2dist(evlon[ievt],stalon(ievt,ir),evlat[ievt],stalat(ievt,ir),earth) / v0;
+            dist = compute_distance(evlon[ievt],evlat[ievt],
+                                    stalon(ievt,ir),stalat(ievt,ir));
+            tobs[ndata] = dist / v0;
+            
             ndata += 1;
         }
     }
@@ -162,14 +164,34 @@ read_spmst_params(const char *filename)
     velinit.resize(nlat,nlon);
     if(do_synthetic) veltrue.resize(nlat,nlon);
 
+    // check if use spherical coordinates
+    int sph;
+    read_line(line,sizeof(line),fp); sscanf(line,"%d",&sph);
+    is_spherical = sph == 1;
+    if(is_spherical){
+        printf("using spherical coordinates ...\n");
+    }
+    else{
+        printf("using cartesian coordinates ...\n");
+    }
+    
+
     fclose(fp);
 
     // allocate space for solver (with more refined grid)
     const int nrefine = 2;
-    float dlon = (lonmax - lonmin) / ((nlon - 1) * nrefine );
-    float dlat = (latmax - latmin) / ((nlat -1 ) * nrefine); 
-    spm2dbase.initialize(lonmin,latmin,dlon,dlat,
-                        (nlon-1)*nrefine,(nlat - 1) * nrefine);
+    int nlonr,nlatr;
+    if(nrefine == 1){
+        nlonr = nlon;
+        nlatr = nlat;
+    }
+    else{
+        nlonr = (nlon - 1) * nrefine;
+        nlatr = (nlat-1) * nrefine;
+    }
+    float dlon = (lonmax - lonmin) / nlonr;
+    float dlat = (latmax - latmin) / nlatr; 
+    spm2dbase.initialize(lonmin,latmin,dlon,dlat,nlonr,nlatr,is_spherical);
 }
 
 void SPMST:: 
