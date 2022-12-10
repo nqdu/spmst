@@ -48,6 +48,12 @@ create_minheap(const fvec &ttime,const imat2 &ibool,std::vector<int> &btree,int 
             parentid = (childid - 1) / 2;
             ielem_parent =  btree[parentid];
             timepar = find_min_time(ielem_parent,ibool,ttime);
+            // childid = parentid;
+            // parentid = (childid - 1) / 2;
+            // ielem_child  = btree[childid];
+            // ielem_parent =  btree[parentid];
+            // timepar = find_min_time(ielem_parent,ibool,ttime);
+            // timechi = find_min_time(ielem_child,ibool,ttime);
         }
     }
 }
@@ -67,7 +73,7 @@ compute_traveltime()
     float vs = get_velocity(xsource,ysource);
     for(int ipt = 0; ipt < NPT2; ipt++){
         int inode = ibool(ielem_src,ipt);
-        float dist = compute_distance(xstore[inode],ystore[inode],zstore[inode],
+        float dist = compute_length(xstore[inode],ystore[inode],zstore[inode],
                                      xsource,ysource,zsource);
         ttime[inode] = dist * 2.0 / (vs + veloc(ielem_src,ipt));
         
@@ -80,7 +86,7 @@ compute_traveltime()
     for(int ir = 0; ir < nreceivers; ir++){
         if(ielem_src != ielem_recv[ir]) continue;
         float vr = get_velocity(stalocs(ir,0),stalocs(ir,1));
-        float dist = compute_distance(xsource,ysource,zsource,stalocs(ir,0),
+        float dist = compute_length(xsource,ysource,zsource,stalocs(ir,0),
                                       stalocs(ir,1),stalocs(ir,2));
         ttime_recv[ir] = dist * 2.0 / (vs + vr);
         comming_node_recv(ir,0) = ielem_src;
@@ -95,6 +101,7 @@ compute_traveltime()
         create_minheap(ttime,ibool,btree,treesize);
         std::swap(btree[treesize-1],btree[0]);
         int ielem = btree[treesize-1];
+        //printf("%d %f\n",ielem,find_min_time(ielem,ibool,ttime));
         treesize -= 1; // remove this point
 
         // add neighbor cells into btree
@@ -132,7 +139,7 @@ compute_traveltime()
             int ipt0 = -1;
             for(int ipt1 :ifront){
                 int inode1 = ibool(ielem,ipt1);
-                float dist = compute_distance(xstore[inode],ystore[inode],zstore[inode],
+                float dist = compute_length(xstore[inode],ystore[inode],zstore[inode],
                                               xstore[inode1],ystore[inode1],zstore[inode1]);
                 t = ttime[inode1] + dist * 2.0 / (veloc(ielem,ipt1) + veloc(ielem,ipt));
                 if(t < t0){
@@ -155,7 +162,7 @@ compute_traveltime()
             int ipt0 = -1;;
             for(int ipt1 :ifront){
                 int inode1 = ibool(ielem,ipt1);
-                float dist = compute_distance(stalocs(ir,0),stalocs(ir,1),stalocs(ir,2),
+                float dist = compute_length(stalocs(ir,0),stalocs(ir,1),stalocs(ir,2),
                                             xstore[inode1],ystore[inode1],zstore[inode1]);
                 float t = ttime[inode1] + dist * 2.0 / (v0 + veloc(ielem,ipt1));
                 if(t < t0){
@@ -211,7 +218,7 @@ frechet_kernel(int ir,fvec &fdm) const
         int inode1 = ibool(ielem1,ipt1);
         x1 = xstore[inode1]; y1 = ystore[inode1]; z1 = zstore[inode1];
         v1 = veloc(ielem1,ipt1);
-        float dist = compute_distance(x0,y0,z0,x1,y1,z1);
+        float dist = compute_length(x0,y0,z0,x1,y1,z1);
         float term = -2.0 * dist / std::pow(v0 + v1,2);
         
         // contribution from inode0/1
@@ -235,7 +242,7 @@ frechet_kernel(int ir,fvec &fdm) const
     }
 
     // contribution from source segment
-    float dist = compute_distance(x0,y0,z0,xsource,ysource,zsource);
+    float dist = compute_length(x0,y0,z0,xsource,ysource,zsource);
     float term = -2.0 * dist / std::pow(v0 + vs,2);
     int inode0 = ibool(ielem0,ipt0);
     fdm[inode0] += term;

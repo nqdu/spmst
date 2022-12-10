@@ -48,7 +48,6 @@ public:
     void locate_source_stations(float evlo,float evla,float* restrict stlo,
                                 float* restrict stla,int nr);
 
-    float compute_distance(float x1,float y1,float z1,float x2,float y2,float z2) const;
     void compute_traveltime();
     void frechet_kernel(int ir, fvec &fdm) const;
 
@@ -58,6 +57,7 @@ public:
     void write_velocity(const char *filename) const;
 
 private:
+    float compute_length(float x1,float y1,float z1,float x2,float y2,float z2) const;
     float get_velocity(float x,float y) const;
     void set_topology();
 };
