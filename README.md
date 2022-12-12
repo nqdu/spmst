@@ -1,6 +1,6 @@
 # SPMST: Surface Wave Tomography with Topography
 ## Introduction 
-SPMST is a package to conduct 2-D surface wave tomography with topography by using shortest path method. In this method, surface wave is viewed propagated along the (curved) surface. 
+SPMST is a package to conduct 2-D surface wave tomography with topography by using shortest path method. In this method, surface wave is propagating along the (curved) surface. 
 
 The package currently support both spherical and cartesian coordinates to adapt surface wave tomography at different scales. The option could be set in the input file `spmst.in`. Some examples are included in the directory `EXAMPLES`.
 
