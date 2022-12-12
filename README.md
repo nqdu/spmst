@@ -44,5 +44,5 @@ to compile the package. After that two binaries will be in the `bin` directory: 
 ### Checkerboard Recovered
 ![image](figure/checkerboard.jpg)
 
-### An Image in Sichuan Basin (T=10s)
+### An Image in Sichuan Basin (T=6s)
 ![image](figure/sichuan.png)
