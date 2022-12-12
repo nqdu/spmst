@@ -11,6 +11,7 @@ bounds=-R$xmin/$xmax/$zmin/$zmax
 proj=-JM12c
 echo $bounds
 awk '{print $1,$2,$4}' $file | gmt surface $bounds -I128+n/128+n -Vq  -Gtime.grd
+awk '{print $1,$2,$4}' time.out.notopo | gmt surface $bounds -I128+n/128+n -Vq  -Gnotop.grd
 
 # read topo
 nlon=`head -1 topo.dat|awk '{print $1}'`
@@ -28,10 +29,12 @@ gmt makecpt -Crainbow -I -D -Z -T$vmin/$vmax/100+n > out.cpt
 gmt begin out pdf 
 gmt basemap $bounds $proj -Bxaf -Byaf -BWnSe 
 gmt grdimage topo.grd -Cout.cpt  $bounds $proj -E200
-gmt grdcontour time.grd $bounds $proj  -W0.75p,black
+gmt grdcontour time.grd $bounds $proj  -W0.75p,black -l"Topo"
+gmt grdcontour notop.grd $bounds $proj  -W0.75p,black,. -l"No Topo"
 grep -v '^#' surfdata.txt | awk '{print $1,$2}' |gmt plot -St0.2c -Gblack
 grep '^#' surfdata.txt | awk '{print $2,$3}' |gmt plot -Sa0.2c -Gred
 #gmt plot ray.dat -W0.2p,red
+
 gmt colorbar $bounds $proj -Cout.cpt -Bxaf+l"Topography,m" 
 gmt end 
 
