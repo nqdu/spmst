@@ -50,7 +50,7 @@ to compile the package. After that two binaries will be in the `bin` directory: 
 ![image](figure/time.png)
 
 ### Checkerboard Recovered
-![image](figure/checkerboard.jpg)
+![image](figure/checkerboard.png)
 
 ### An Image in Sichuan Basin (T=6s)
 ![image](figure/sichuan.png)

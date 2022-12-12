@@ -25,14 +25,14 @@ gmt makecpt -Cseis -D -Z -T$vmin/$vmax/100+n > out.cpt
 
 # plot
 gmt begin out pdf 
-gmt basemap $bounds $proj -Bxaf -Byaf -BWnSe 
+gmt basemap $bounds $proj -Bxaf -Byaf -BWnSe+t"Recovered Model"
 gmt grdimage model.grd -Cout.cpt  $bounds $proj -E200
 grep -v '^#' surfdata.txt | awk '{print $1,$2}' |gmt plot -St0.3c -Gblue
 gmt colorbar $bounds $proj -Cout.cpt -Bxaf+l"veloc,km/s"
 #awk '{print $1,$2,$3,$5/5}' out_grad.dat| gmt plot $bounds $proj  -Sv0.05i -W0.5p -Gblack 
 #awk '{print $1,$2,$4,$5/5}' out_grad.dat| gmt plot $bounds $proj  -Sv0.05i -W0.5p,-- -Gred 
 
-gmt basemap $bounds $proj -Bxaf -Byaf -BwnSe -X13c
+gmt basemap $bounds $proj -Bxaf -Byaf -BwnSe+t"True Model" -X13c
 gmt grdimage true.grd -Cout.cpt  $bounds $proj -E200
 grep -v '^#' surfdata.txt | awk '{print $1,$2}' |gmt plot -St0.3c -Gblue
 gmt colorbar $bounds $proj -Cout.cpt -Bxaf+l"veloc,km/s"
