@@ -1,7 +1,7 @@
 # study region
 89.2  38.9 # lonmin latmin
 90.3  39.3  # lonmax latmax
-60 60 #  of elements in lon/lat direction
+120 120 #  of elements in lon/lat direction
 1       # use spherical coordinates
 
 # inversion parameters

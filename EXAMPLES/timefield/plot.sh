@@ -29,8 +29,10 @@ gmt begin out pdf
 gmt basemap $bounds $proj -Bxaf -Byaf -BWnSe 
 gmt grdimage topo.grd -Cout.cpt  $bounds $proj -E200
 gmt grdcontour time.grd $bounds $proj  -W0.75p,black
-gmt plot ray.dat -W0.2p,red
-gmt colorbar $bounds $proj -Cout.cpt -Bxaf+l"veloc,km/s" 
+grep -v '^#' surfdata.txt | awk '{print $1,$2}' |gmt plot -St0.2c -Gblack
+grep '^#' surfdata.txt | awk '{print $2,$3}' |gmt plot -Sa0.2c -Gred
+#gmt plot ray.dat -W0.2p,red
+gmt colorbar $bounds $proj -Cout.cpt -Bxaf+l"Topography,m" 
 gmt end 
 
 rm  *.grd *.cpt 
