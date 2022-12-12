@@ -29,8 +29,16 @@ In `surfdata.txt`, repeat the snippet:
 # evlo evla nsta
 stlo stla v0 (nsta lines )
 ```
+### 4. Set Your Initial and True Model
+The initial model and the True model are in the same format. It's just a single column (please see `velocinit.in`). The file will be started from (lonmin,latmin)  to (lonmax,latmax) and is sorted like
+```python
+for i in range(ny):
+    for j in range(nx):
+        f.write("%f\n",veloc[i,j])
+``` 
+Where `nlat (ny)` and `nlon (nx)` should be the same with that in `spmst.in`.
 
-### 4. Compile and Run the Code
+### 5. Compile and Run the Code
 Change `EIGEN_INC` (path to the [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) libary) in `Makefile` and use 
 ```bash
 make -j4
