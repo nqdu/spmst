@@ -1,6 +1,7 @@
 #include "spm2d.hpp"
 #include "shared/gps2dist.hpp"
 #include <iostream> 
+#include "shared/bilinear.hpp"
 
 void SPM2D:: 
 write_timefield(const char *filename) const
@@ -109,4 +110,71 @@ set_topology()
         zstore[inode] = interp2d(topo_x.data(),topo_y.data(),topo_z.data(),
                                  nx,ny,x0,y0);
     }}
+}
+
+/**
+ * @brief write vtk file for current velocity
+ * 
+ * @param vtkfile 
+ */
+void SPM2D:: 
+write_vtk(const char *vtkfile) const
+{
+    FILE *fp = fopen(vtkfile,"w");
+    if (fp == NULL) {
+        printf("cannot open %s\n",vtkfile);
+        exit(1);
+    }
+
+    // writing flags
+    fprintf(fp, "# vtk DataFile Version 2.0\n");
+    fprintf(fp, "material model VTK file\n");
+    fprintf(fp, "ASCII\n");
+
+    // writing grid
+    fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
+    fprintf(fp,"POINTS %d float\n",nptstot);
+    for(int inode = 0; inode < nptstot; inode ++){
+        fprintf(fp,"%f %f %f\n",xstore[inode],ystore[inode],zstore[inode]);
+    }
+    fprintf(fp,"\n");
+
+    // writing cells
+    fprintf(fp,"CELLS %d %d\n",nelmnts,nelmnts*5);
+    for(int ielem = 0; ielem < nelmnts; ielem ++){
+        fprintf(fp,"4 ");
+        fprintf(fp,"%d %d %d %d\n",ibool(ielem,0),ibool(ielem,1),ibool(ielem,3),ibool(ielem,2));
+    }
+    fprintf(fp,"\n");
+
+    // writing pixel
+    fprintf(fp,"CELL_TYPES %d\n",nelmnts);
+    for(int ielem = 0; ielem < nelmnts; ielem ++){
+        fprintf(fp,"9\n");
+    }
+    fprintf(fp,"\n");
+
+    // allocate flag 
+    std::vector<int> mask_ibool(nptstot);
+    memset(mask_ibool.data(),0,sizeof(int)*nptstot);
+    std::vector<float> flag_val(nptstot);
+    for(int ielem = 0; ielem < nelmnts; ielem ++){
+    for(int ipts = 0; ipts < NPT2; ipts ++ ){
+        int inode = ibool(ielem,ipts);
+        if(mask_ibool[inode] == 0){
+            flag_val[inode] = veloc(ielem,ipts);
+            mask_ibool[inode] = 1;
+        }
+    }}
+
+    // write point data
+    fprintf(fp,"POINT_DATA %d\n",nptstot);
+    fprintf(fp,"SCALARS Velocity float\n");
+    fprintf(fp,"LOOKUP_TABLE default\n");
+    for(int inode = 0; inode < nptstot; inode ++){
+        fprintf(fp,"%f\n",flag_val[inode]);
+    }
+    fprintf(fp,"\n");
+
+    fclose(fp);
 }

@@ -55,6 +55,7 @@ public:
     void write_timefield(const char *filename) const;
     void write_raypath(const char *filename) const;
     void write_velocity(const char *filename) const;
+    void write_vtk(const char *vtkfile) const;
 
 private:
     float compute_length(float x1,float y1,float z1,float x2,float y2,float z2) const;
