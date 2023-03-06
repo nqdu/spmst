@@ -107,7 +107,7 @@ read_topo_file(const char *filename,fvec &lon,fvec &lat,fmat2 &topo)
 void SPMST:: 
 read_topography(const char *filename)
 {
-    printf("\nreading topography ...\n");
+    printf("\nreading topography from %s ...\n",filename);
     fvec lon,lat; 
     fmat2 topo;
     read_topo_file(filename,lon,lat,topo);
@@ -180,7 +180,7 @@ read_spmst_params(const char *filename)
     fclose(fp);
 
     // allocate space for solver (with more refined grid)
-    const int nrefine = 2;
+    const int nrefine = 3;
     int nlonr,nlatr;
     if(nrefine == 1){
         nlonr = nlon;

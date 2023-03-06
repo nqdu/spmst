@@ -86,7 +86,7 @@ set_topology(const char *filename)
     topo_z = topo;
 
     // now set topology to the SPM class
-    set_topology();
+    this -> set_topology();
 }
 
 void SPM2D::
@@ -95,5 +95,18 @@ set_topology(fvec &lon, fvec &lat, fmat2 &topo)
     topo_x.resize(lon.size()); topo_y.resize(lat.size());
     topo_z.resize(topo.rows(),topo.cols());
     topo_x = lon; topo_y = lat; topo_z = topo;
-    set_topology();
+    this -> set_topology();
+}
+
+void SPM2D::
+set_topology()
+{
+    int nx = topo_z.cols(), ny = topo_z.rows();
+    for(int ielem = 0; ielem < nelmnts; ielem++){
+    for(int ipt = 0; ipt < NPT2; ipt++){
+        int inode = ibool(ielem,ipt);
+        float x0 = xstore[inode], y0 = ystore[inode];
+        zstore[inode] = interp2d(topo_x.data(),topo_y.data(),topo_z.data(),
+                                 nx,ny,x0,y0);
+    }}
 }

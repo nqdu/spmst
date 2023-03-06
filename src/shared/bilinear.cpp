@@ -49,16 +49,3 @@ interp2d(const float* restrict x, const float* restrict y,
     
     return out ;
 }
-
-void SPM2D::
-set_topology()
-{
-    int nx = topo_z.cols(), ny = topo_z.rows();
-    for(int ielem = 0; ielem < nelmnts; ielem++){
-    for(int ipt = 0; ipt < NPT2; ipt++){
-        int inode = ibool(ielem,ipt);
-        float x0 = xstore[inode], y0 = ystore[inode];
-        zstore[inode] = interp2d(topo_x.data(),topo_y.data(),topo_z.data(),
-                                 nx,ny,x0,y0);
-    }}
-}
