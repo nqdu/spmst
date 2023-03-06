@@ -17,7 +17,7 @@ Where your topography will be started from (lonmin,latmin)  to (lonmax,latmax) a
 ```python
 for i in range(nlat):
     for j in range(nlon):
-        f.write("%f\n",z[i,j])
+        f.write("%f\n"%z[i,j])
 ```
 
 ### 2. Set Study Area and Inverse Problem Parameters
@@ -34,7 +34,7 @@ The initial model and the True model are in the same format. It's just a single 
 ```python
 for i in range(ny):
     for j in range(nx):
-        f.write("%f\n",veloc[i,j])
+        f.write("%f\n"%veloc[i,j])
 ``` 
 Where `nlat (ny)` and `nlon (nx)` should be the same with that in `spmst.in`.
 
@@ -46,6 +46,8 @@ make -j4
 to compile the package. After that two binaries will be in the `bin` directory: `tomo` and `travel`. The `tomo` is to conduct 2-D tomography and the `travel` is to synthetic the whole time field for a specific event. Just feel free to go to `EXAMPLES` to run all the examples here.
 
 ## Gallery
+### Topography Adaptive Mesh
+![image](figure/topo.jpeg)
 ### Travel time Field with Topography
 ![image](figure/time.png)
 
