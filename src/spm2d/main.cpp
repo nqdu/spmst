@@ -69,4 +69,7 @@ int main(){
     // save results
     spm2d.write_timefield("time.out");
     spm2d.write_raypath("ray.dat");
+    spm2d.write_vtk("veloc.vtk");
+
+    return 0;
 }
