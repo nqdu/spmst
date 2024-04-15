@@ -20,11 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifdef __APPLE__
-  #include <vecLib/vecLib.h>
-#else
-  #include "clsqr2/cblas.hpp"
-#endif
+#include "clsqr2/cblas.hpp"
 #include "clsqr2/aprod.hpp"
 
 #define ZERO   0.0
@@ -416,17 +412,17 @@ dload( const int n, const real_t alpha, real_t x[] )
 void lsqr( 
           int m,
           int n,
-          const real_t* restrict value,
-          const int* restrict indices,
-          const int* restrict indptr,
+          const real_t* value,
+          const int* indices,
+          const int* indptr,
           real_t damp,
-          const real_t* restrict b,     // len = m
+          const real_t* b,     // len = m
           real_t* restrict x,
           real_t atol,
           real_t btol,
           real_t conlim,
           int    itnlim,
-          void   *nout_void,
+          void   *filestream,
           // The remaining variables are output only.
           int    *istop_out,
           int    *itn_out,
@@ -434,7 +430,8 @@ void lsqr(
           real_t *acond_out,
           real_t *rnorm_out,
           real_t *arnorm_out,
-          real_t *xnorm_out
+          real_t *xnorm_out,
+          int nprocs_used
          )
 {
 //  Local copies of output variables.  Output vars are assigned at exit.
@@ -515,7 +512,7 @@ void lsqr(
 
 //  Initialize.
     real_t u[m], v[n], w[n],se[n];
-    FILE *nout = (FILE*)nout_void;
+    FILE *nout = (FILE*)filestream;
     for(int i=0;i<m;i++) u[i] = b[i];
     if (nout != NULL)
         fprintf(nout, fmt_1000,
@@ -555,7 +552,7 @@ void lsqr(
 
     if (beta > ZERO) {
         cblas_dscal ( m, (ONE / beta), u, 1 );
-        aprod ( 2, m, n, v, u,value,indices,indptr);
+        aprod2 ( m, n, v, u,value,indices,indptr,nprocs_used);
         alpha  =   cblas_dnrm2 ( n, v, 1 );
     }
 
@@ -602,7 +599,7 @@ void lsqr(
 //                alpha*v  =  A(transpose)*u  -  beta*v.
 //      ------------------------------------------------------------------
         cblas_dscal ( m, (- alpha), u, 1 );
-        aprod ( 1, m, n, v, u, value,indices,indptr);
+        aprod1 ( m, n, v, u, value,indices,indptr,nprocs_used);
         beta   =   cblas_dnrm2 ( m, u, 1 );
 
 //      Accumulate  anorm = || Bk ||
@@ -615,7 +612,7 @@ void lsqr(
         if (beta > ZERO) {
             cblas_dscal ( m, (ONE / beta), u, 1 );
             cblas_dscal ( n, (- beta), v, 1 );
-            aprod ( 2, m, n, v, u, value,indices,indptr);
+            aprod2 ( m, n, v, u, value,indices,indptr,nprocs_used);
             alpha  =   cblas_dnrm2 ( n, v, 1 );
             if (alpha > ZERO) {
                 cblas_dscal ( n, (ONE / alpha), v, 1 );

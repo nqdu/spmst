@@ -1,4 +1,4 @@
-#include "spm2d.hpp"
+
 
 /**
  * @brief bilinear interpolation to get interp coefs 
@@ -8,7 +8,7 @@
  * @param x0,y0 interp point
  * @return float 
  */
-void bilinear(const float* restrict x, const float* restrict y,int nx,int ny,
+void bilinear(const float* x, const float* y,int nx,int ny,
                 float x0,float y0,int &ix,int &iy,float* restrict coef)
 {
     float dx = x[1] - x[0], dy = y[1] - y[0];
@@ -38,8 +38,8 @@ void bilinear(const float* restrict x, const float* restrict y,int nx,int ny,
  * @return float 
  */
 float 
-interp2d(const float* restrict x, const float* restrict y,
-        const float* restrict z,int nx,int ny,float x0,float y0)
+interp2d(const float* x, const float* y,
+        const float* z,int nx,int ny,float x0,float y0)
 {
     float coef[4];
     int ix,iy;

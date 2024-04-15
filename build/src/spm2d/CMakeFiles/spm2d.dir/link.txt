@@ -1,0 +1,2 @@
+/usr/bin/ar qc libspm2d.a CMakeFiles/spm2d.dir/compute.cpp.o CMakeFiles/spm2d.dir/initialize.cpp.o CMakeFiles/spm2d.dir/io.cpp.o
+/usr/bin/ranlib libspm2d.a

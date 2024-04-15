@@ -1,4 +1,6 @@
 # SPMST: Surface Wave Tomography with Topography
+## I'm still organizing manual and examples ...
+
 ## Introduction 
 SPMST is a package to conduct 2-D surface wave tomography with topography by using shortest path method. In this method, surface wave is propagating along the (curved) surface. 
 
@@ -39,11 +41,13 @@ for i in range(ny):
 Where `nlat (ny)` and `nlon (nx)` should be the same with that in `spmst.in`.
 
 ### 5. Compile and Run the Code
-Change `EIGEN_INC` (path to the [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) libary) in `Makefile` and use 
+Download [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page), and compile it by using:
 ```bash
+mkdir build; cd build;
+cmake .. -DCXX=g++ -DFC=gfortran -DEIGEN_INC=/path/to/your/eigen
 make -j4
 ```
-to compile the package. After that two binaries will be in the `bin` directory: `tomo` and `travel`. The `tomo` is to conduct 2-D tomography and the `travel` is to synthetic the whole time field for a specific event. Just feel free to go to `EXAMPLES` to run all the examples here.
+to compile the package. After that three binaries will be in the `bin` directory: `tomo2d`, `tomo3d` and `travel`. The `tomo2d/3d` is to conduct 2-D/3-D tomography and the `travel` is to synthetic the whole time field for a specific event. Just feel free to go to `EXAMPLES` to run all the examples here.
 
 ## Gallery
 ### Topography Adaptive Mesh

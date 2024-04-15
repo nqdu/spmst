@@ -1,0 +1,18 @@
+# SPMST2D inversion Parameters
+
+# # of iterations
+NITERS =  6
+ITER_CURRENT = 0 # current iteration
+
+#  minimum velocity, maximum velocity in km/s
+MIN_VELOC =  2.0
+MAX_VELOC = 5.0 
+
+# synthetic test
+SYN_TEST = 1                # synthetic flag(0:real data,1:synthetic)
+NOISE_LEVEL = 0.5          #  noise level, std value of gaussian noise
+
+# for LSMR-based inversion 
+SMOOTH = 5.0  # 2-nd Tikhonov regularization parameter
+DAMP = 0.01    # damping parameter for LSMR
+NTHREADS =  2  # # of threads used in LSMR solver 

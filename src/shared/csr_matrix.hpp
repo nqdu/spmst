@@ -1,8 +1,8 @@
-#ifndef CSR_MATRIX_H
-#define CSR_MATRIX_H
+#ifndef _SPMST_CSR_MATRIX_H
+#define _SPMST_CSR_MATRIX_H
 
-class LSQRDict{
-public:
+struct LSQRDict{
+    
     float  atol,btol;
     float  conlim; 
     int itnlim,istop,itn;
@@ -10,10 +10,11 @@ public:
     float  xnorm,rnorm;
     float  damp,weight;
     bool verbose;
+    int nprocs;
     
     // some parameters defined
     // you could change it according to your own settings
-    LSQRDict(int iterlim,float damp0,float smooth){
+    LSQRDict(int iterlim,float damp0,float smooth,int nproc_in = 1){
         atol = 1.0e-5,btol = 1.0e-5;
         conlim = 1.0e6;
         istop = 0;
@@ -26,6 +27,8 @@ public:
         weight = smooth;
 
         verbose = false;
+
+        nprocs = nproc_in;
     }
 };
 
@@ -59,10 +62,14 @@ public:
 
     void lsqr_solver(const float* restrict b, float * restrict x,LSQRDict &dict) const;
 
-    void read(const char* filename);
+    void read_binary(const char *filename);
+    void write_binary(const char *filename) const;
 
     int rows() const;
     int cols() const;
+
+    // merge function
+    static void merge_csr_files(int nprocs,const char *outfile);
 }; 
 
 #endif

@@ -1,33 +1,40 @@
 #include "spm2d.hpp"
 #include "shared/gps2dist.hpp"
+#include "shared/IO.hpp"
 #include <iostream> 
-#include "shared/bilinear.hpp"
 
-void SPM2D:: 
-write_timefield(const char *filename) const
+void SPM2DSolver:: 
+write_timefield(const SPM2DMesh &mesh,const char *filename) const
 {
-    FILE *fp = fopen(filename,"w");
+    int nelmnts = mesh.nelmnts;
+    FILE *fp = fopen(filename,"wb");
+    fmat2 temp(nelmnts*NPT2,4);
+
+    int c = 0;
     for(int ielem = 0; ielem < nelmnts; ielem++){
     for(int ipt = 0; ipt < NPT2; ipt++){
-        int inode = ibool(ielem,ipt);
-        float x = xstore[inode], y = ystore[inode], z = zstore[inode];
+        int inode = mesh.ibool(ielem,ipt);
+        float x = mesh.xstore[inode], y = mesh.ystore[inode], z = mesh.zstore[inode];
         //float t = gps2dist(x,xsource,y,ysource,earth) / 3.0;
-        fprintf(fp,"%f %f %f %f\n",x,y,z,ttime[inode]);
-    }
-    }
+        temp(c,0) = x; temp(c,1) = y; temp(c,2) = z;
+        temp(c,3) = ttime[inode];
+        c += 1;
+    }}
+
+    fwrite(temp.data(),sizeof(float),temp.size(),fp);
     fclose(fp);
 }
 
-void SPM2D:: 
-write_raypath(const char *filename) const
+void SPM2DSolver:: 
+write_raypath(const SPM2DMesh &mesh,const char *filename) const
 {
     FILE *fp = fopen(filename,"w");
     for(int ir = 0; ir < nreceivers; ir++){
         fprintf(fp,"%f %f %f\n",stalocs(ir,0),stalocs(ir,1),stalocs(ir,2));
         int ielem = comming_node_recv(ir,0), ipt = comming_node_recv(ir,1);
         while(ipt !=-1){
-            int inode = ibool(ielem,ipt);
-            fprintf(fp,"%f %f %f\n",xstore[inode],ystore[inode],zstore[inode]);
+            int inode = mesh.ibool(ielem,ipt);
+            fprintf(fp,"%f %f %f\n",mesh.xstore[inode],mesh.ystore[inode],mesh.zstore[inode]);
             ielem = comming_node(inode,0); 
             ipt = comming_node(inode,1);
         }
@@ -37,7 +44,7 @@ write_raypath(const char *filename) const
     fclose(fp);
 }
 
-void SPM2D::
+void SPM2DMesh::
 write_velocity(const char *filename) const
 {
     FILE *fp = fopen(filename,"w");
@@ -50,21 +57,26 @@ write_velocity(const char *filename) const
     fclose(fp);
 }
 
-void SPM2D::
-set_topology(const char *filename)
+/**
+ * @brief read topography from file
+ * 
+ * @param filename 
+ */
+void SPM2DMesh::
+read_topography(const char *filename)
 {
-    FILE *fp = fopen(filename,"r");
-    if(fp == NULL) {
+    std::ifstream fp; fp.open(filename);
+    if(!fp.is_open()) {
         printf("cannot find %s\n",filename);
         exit(1);
     }
 
     // read meta data 
-    int ierr;
     int nlon,nlat; 
     float dlon,dlat,lonmin,latmin,lonmax,latmax;
-    ierr = fscanf(fp,"%d%d",&nlon,&nlat); assert(ierr == 2);
-    ierr = fscanf(fp,"%f%f%f%f",&lonmin,&lonmax,&latmin,&latmax); assert(ierr == 4);
+    read_file_param(fp,nlon,nlat);
+    read_file_param(fp,lonmin,lonmax);
+    read_file_param(fp,latmin,latmax);
     dlon = (lonmax - lonmin) / (nlon - 1); dlat = (latmax - latmin) / (nlat - 1);
     
     // set coordinates
@@ -76,40 +88,18 @@ set_topology(const char *filename)
     // read topo
     for(int iy = 0; iy < nlat; iy++){
     for(int ix = 0; ix < nlon; ix++){
-        ierr = fscanf(fp,"%f",&topo(iy,ix)); assert(ierr == 1);
+        read_file_param(fp,topo(iy,ix));
     }}
     topo = topo * 0.001;
 
-    fclose(fp);
+    fp.close();
 
     // copy arrays to private data
     topo_x = lon; topo_y = lat;
     topo_z = topo;
 
     // now set topology to the SPM class
-    this -> set_topology();
-}
-
-void SPM2D::
-set_topology(fvec &lon, fvec &lat, fmat2 &topo)
-{
-    topo_x.resize(lon.size()); topo_y.resize(lat.size());
-    topo_z.resize(topo.rows(),topo.cols());
-    topo_x = lon; topo_y = lat; topo_z = topo;
-    this -> set_topology();
-}
-
-void SPM2D::
-set_topology()
-{
-    int nx = topo_z.cols(), ny = topo_z.rows();
-    for(int ielem = 0; ielem < nelmnts; ielem++){
-    for(int ipt = 0; ipt < NPT2; ipt++){
-        int inode = ibool(ielem,ipt);
-        float x0 = xstore[inode], y0 = ystore[inode];
-        zstore[inode] = interp2d(topo_x.data(),topo_y.data(),topo_z.data(),
-                                 nx,ny,x0,y0);
-    }}
+    this -> set_topography(); 
 }
 
 /**
@@ -117,7 +107,7 @@ set_topology()
  * 
  * @param vtkfile 
  */
-void SPM2D:: 
+void SPM2DMesh:: 
 write_vtk(const char *vtkfile) const
 {
     FILE *fp = fopen(vtkfile,"w");

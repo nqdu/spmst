@@ -1,0 +1,2 @@
+/usr/bin/ar qc libswd.a CMakeFiles/swd.dir/slegn96.f90.o CMakeFiles/swd.dir/sregn96.f90.o CMakeFiles/swd.dir/surfdisp.cpp.o CMakeFiles/swd.dir/surfdisp96.f.o
+/usr/bin/ranlib libswd.a

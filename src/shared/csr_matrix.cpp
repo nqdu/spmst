@@ -1,8 +1,9 @@
 #include "shared/csr_matrix.hpp" 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <iostream>
+#include <fstream>
 #include "clsqr2/lsqr.hpp"
+#include "shared/IO.hpp"
+#include <string>
 
 void csr_matrix:: 
 initialize(int rows,int cols,int nar)
@@ -34,33 +35,76 @@ csr_matrix::
     }
 }
 
-// reader
-void csr_matrix::
-read(const char *filename)
+
+void csr_matrix:: 
+read_binary(const char *filename)
 {
     // open file
-    FILE *fp;
-    if((fp=fopen(filename,"r"))==NULL){
+    std::ifstream fp(filename,std::ios::binary);
+    if (!fp.is_open()) {
+        printf("Error opening file %s\n",filename);
+        exit(1);
+    }
+
+    // scan first to read size of the matrix
+    int m,n;
+    fp.read((char*)&m,sizeof(int));
+    fp.read((char*)&n,sizeof(int));
+
+    // read nonzeros/rows in this block
+    int idx,nar,nar1;
+    nar1 = 0;
+    while(!fp.read((char*)&idx,sizeof(int))){
+        fp.read((char*)&nar,sizeof(int));
+        nar1 += nar;
+        
+        // read temporay 
+        float tmp[nar * 2];
+        fp.read((char*)tmp,sizeof(float)*nar*2);
+    }
+    fp.close();
+
+    // allocate space 
+    this -> initialize(m,n,nar1);
+
+    // now read matrix data
+    fp.open(filename,std::ios::binary);
+    fp.read((char*)&m,sizeof(int));
+    fp.read((char*)&n,sizeof(int));
+    while(!fp.read((char*)&idx,sizeof(int))){
+        fp.read((char*)&nar,sizeof(int));
+        int start = indptr[idx];
+        indptr[idx + 1] = nar + start;
+        fp.read((char*)(indices + start),sizeof(int)*nar);
+        fp.read((char*)(data + start),sizeof(float)*nar);
+    }
+
+    // close file
+    fp.close();
+}
+
+void csr_matrix:: 
+write_binary(const char *filename) const
+{
+    // open file
+    std::ofstream fp(filename,std::ios::binary);
+    if(!fp.is_open()){
         printf("cannot open file %s\n",filename);
-        exit(0);
+        exit(1);
     } 
 
-    // read from file
-    char line[100],dummy;
-    int rw_idx,nar;
-    
-    while(fgets(line,sizeof(line),fp)!=NULL){
-        if(line[0] != '#') break;
-        sscanf(line,"%c%d%d",&dummy,&rw_idx,&nar);
-        int start = indptr[rw_idx];
-        indptr[rw_idx + 1] = nar + start;
-        int end = indptr[rw_idx + 1];
-        //std::cout << start << " " << end << std::endl;
-        for(int i=start;i<end;i++){
-            assert(fscanf(fp,"%d%f\n",indices +i ,data + i) == 2);
-        }
+    for(int i = 0; i < MATRIX_ROW; i++){
+        int start = indptr[i], end = indptr[i+1];
+        int nonzeros = end - start;
+        fp.write((char*)&i,sizeof(int));
+        fp.write((char*)&nonzeros,sizeof(int));
+        fp.write((char*)(indices + start),sizeof(int)*nonzeros);
+        fp.write((char*)(data + start),sizeof(int)*nonzeros);
     }
+
+    fp.close();
 }
+
 
 /**
  * @brief solve sparse linear system Ax = b by lsqr method
@@ -70,13 +114,13 @@ read(const char *filename)
  * @param dict LSQR dict
  */
 void csr_matrix::
-lsqr_solver(const float* restrict b, float* restrict x,LSQRDict &dict) const
+lsqr_solver(const float* b, float* restrict x,LSQRDict &dict) const
 {
     // initialize x 
     for(int i = 0; i < MATRIX_COL; i++) x[i] = 0.0;
     lsqr(MATRIX_ROW,MATRIX_COL,data,indices,indptr,dict.damp,b,x,dict.atol,
          dict.btol,dict.conlim,dict.itnlim,NULL,&dict.istop,&dict.itn,
-         &dict.anorm,&dict.acond,&dict.rnorm,&dict.arnorm,&dict.xnorm);
+         &dict.anorm,&dict.acond,&dict.rnorm,&dict.arnorm,&dict.xnorm,dict.nprocs);
 }
 
 int csr_matrix:: rows() const
@@ -87,4 +131,48 @@ int csr_matrix:: rows() const
 int csr_matrix:: cols() const
 {
     return MATRIX_COL;
+}
+
+/**
+ * merge csr files saved by several procs
+ * @param nprocs # of threads used 
+ * @param outfile # base filename, such as csr.bin
+*/
+void csr_matrix:: merge_csr_files(int nprocs,const char *outfile)
+{
+    std::ifstream fp;
+    std::ofstream fpout;
+    fpout.open(outfile,std::ios::binary);
+
+    for(int irank = 0; irank < nprocs; irank ++){
+        // open filename
+        std::string filename = std::string(outfile) + "." + std::to_string(irank);
+        fp.open(filename.c_str(),std::ios::binary);
+
+        //get size 
+        fp.seekg(0,std::ios::end);
+        long size = (size_t)fp.tellg() - sizeof(int) * 2;
+        fp.close();
+
+        // read rows/cols 
+        fp.open(filename.c_str(),std::ios::binary);
+        int m,n;
+        fp.read((char*)&m,sizeof(int));
+        fp.read((char*)&n,sizeof(int));
+        if(irank == 0) {
+            fpout.write((char*)&m,sizeof(int));
+            fpout.write((char*)&n,sizeof(int));
+        }
+
+        // write to fpout
+        char *chunk = new char[size + 1];
+        fp.read(chunk,size);
+        fpout.write(chunk,size);
+        fp.close();
+        
+        // remove this file
+        std::remove(filename.c_str());
+        delete [] chunk;
+    }
+    fpout.close();
 }

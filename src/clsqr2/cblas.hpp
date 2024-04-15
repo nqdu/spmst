@@ -29,10 +29,10 @@
    CBLAS library header file.
 */
 
-#ifndef _CBLAS_H
-#define _CBLAS_H
+#ifndef _LSQR_CBLAS_H
+#define _LSQR_CBLAS_H
 
-#include "clsqr2.hpp"
+#include "clsqr_const.hpp"
 #include <math.h>
 #include <stddef.h>
 
@@ -46,16 +46,16 @@ cblas_daxpy( const int N, const real_t alpha, const real_t *X,
              const int incX, real_t* restrict Y, const int incY);
 
 void
-cblas_dcopy( const int N, const real_t* restrict X,
+cblas_dcopy( const int N, const real_t* X,
              const int incX, real_t* restrict Y, const int incY);
 
 
 real_t
-cblas_ddot( const int N, const real_t* restrict X,
-            const int incX, const real_t* restrict Y, const int incY);
+cblas_ddot( const int N, const real_t* X,
+            const int incX, const real_t* Y, const int incY);
 
 real_t
-cblas_dnrm2( const int N, const real_t* restrict X, const int incX);
+cblas_dnrm2( const int N, const real_t* X, const int incX);
 
 void
 cblas_dscal(const int N, const real_t alpha, real_t* restrict X, const int incX);

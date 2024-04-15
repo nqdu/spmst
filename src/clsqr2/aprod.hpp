@@ -1,5 +1,13 @@
-#include "clsqr2.hpp"
+#ifndef _LSQR_APROD_H
+#define _LSQR_APROD_H
 
-void aprod(int mode, int m, int n, real_t* restrict x, real_t* restrict y,
-           const real_t* restrict val, const int* restrict indices,
-           const int *restrict indptr);
+#include "clsqr_const.hpp"
+
+void aprod1(int m,int n,const real_t *x,real_t* restrict y,
+           const real_t* val, const int* indices,
+           const int* indptr,int nproc);
+
+void aprod2(int m,int n,real_t* restrict x,const real_t* y,
+           const real_t* val, const int* indices,
+           const int* indptr,int nproc);
+#endif

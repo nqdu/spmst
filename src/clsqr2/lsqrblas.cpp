@@ -41,7 +41,7 @@
    - cblas_dscal
 */
 
-#include "clsqr2/cblas.hpp"
+#include "cblas.hpp"
 
 /*!
   \param[in]     N
@@ -92,7 +92,7 @@ cblas_daxpy( const int N, const real_t alpha, const real_t *X,
   \param[in]     incY
 */
 void
-cblas_dcopy( const int N, const real_t* restrict X,
+cblas_dcopy( const int N, const real_t* X,
              const int incX, real_t* restrict Y, const int incY)
 {
   int i;
@@ -117,8 +117,8 @@ cblas_dcopy( const int N, const real_t* restrict X,
 
 */
 real_t
-cblas_ddot( const int N, const real_t* restrict X,
-            const int incX, const real_t* restrict Y, const int incY)
+cblas_ddot( const int N, const real_t* X,
+            const int incX, const real_t* Y, const int incY)
 {
   real_t r  = 0.0;
   int    i;
@@ -142,7 +142,7 @@ cblas_ddot( const int N, const real_t* restrict X,
   \return Two-norm of X.
 */
 real_t
-cblas_dnrm2( const int N, const real_t* restrict X, const int incX) 
+cblas_dnrm2( const int N, const real_t* X, const int incX) 
 {
   real_t
       scale = 0.0,

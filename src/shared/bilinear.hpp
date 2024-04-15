@@ -1,5 +1,9 @@
-void bilinear(const float* restrict x, const float* restrict y,int nx,int ny,
+#ifndef _SPMST_INTERP_H
+#define _SPMST_INTERP_H
+void bilinear(const float* x, const float* y,int nx,int ny,
                 float x0,float y0,int &ix,int &iy,float* restrict coef);
 
-float interp2d(const float* restrict x, const float* restrict y,
-        const float* restrict z,int nx,int ny,float x0,float y0);
+float interp2d(const float* x, const float* y,
+        const float* z,int nx,int ny,float x0,float y0);
+
+#endif

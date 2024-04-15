@@ -1,0 +1,2 @@
+/usr/bin/ar qc libshare.a CMakeFiles/share.dir/IO.cpp.o CMakeFiles/share.dir/bilinear.cpp.o CMakeFiles/share.dir/csr_matrix.cpp.o CMakeFiles/share.dir/gaussian.cpp.o CMakeFiles/share.dir/gps2dist.cpp.o CMakeFiles/share.dir/invparam.cpp.o CMakeFiles/share.dir/parallel_tools.cpp.o
+/usr/bin/ranlib libshare.a
