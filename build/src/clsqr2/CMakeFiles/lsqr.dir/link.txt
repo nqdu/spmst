@@ -1,2 +1,0 @@
-/usr/bin/ar qc liblsqr.a CMakeFiles/lsqr.dir/aprod.cpp.o CMakeFiles/lsqr.dir/lsqr.cpp.o CMakeFiles/lsqr.dir/lsqrblas.cpp.o
-/usr/bin/ranlib liblsqr.a

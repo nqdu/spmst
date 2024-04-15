@@ -1,6 +1,0 @@
-# The fortran modules provided by this target.
-provides
- lovewavekernel.mod
- lovewavemodel.mod
- rayleighwavekernel.mod
- rayleighwavemodel.mod

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libspmst3D.a CMakeFiles/spmst3D.dir/compute_swd.cpp.o CMakeFiles/spmst3D.dir/initialize.cpp.o CMakeFiles/spmst3D.dir/io.cpp.o CMakeFiles/spmst3D.dir/tomography.cpp.o
-/usr/bin/ranlib libspmst3D.a
