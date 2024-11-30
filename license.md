@@ -87,7 +87,7 @@ Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted in Sectio
 
 3. Responsibilities
 3.1. Distribution of Source Form
-All distribution of Covered Software in Source Code Form, including any Modifications that You create or to which You contribute, must be under the terms of this License. You must inform recipients that the Source Code Form of the Covered Software is governed by the terms of this License, and how they can obtain a copy of this License. You may not attempt to alter or restrict the recipients’ rights in the Source Code Form.
+All distribution of Covered Software in Source Code Form, including any Modifications that You create or to which You contribute, must be under the terms of this License. You must inform recipients that the Source Code Form of the Covered Software is governed by the terms of this License, and how they can obtain a copy of this License. You may not attempt to alter or __restrict the recipients’ rights in the Source Code Form.
 
 3.2. Distribution of Executable Form
 If You distribute Covered Software in Executable Form then:
