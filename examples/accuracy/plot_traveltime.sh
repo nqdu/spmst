@@ -1,17 +1,21 @@
 #!/bin/bash 
-set -e
+#set -e
 
 # get travel time grd
 file=time.out
-line=`gmt gmtinfo $file -C`
+line=`gmt gmtinfo $file -bi4f -C`
 xmin=`echo $line |awk '{print $1}'`
 xmax=`echo $line |awk '{print $2}'`
 zmin=`echo $line |awk '{print $3}'`
 zmax=`echo $line |awk '{print $4}'`
+dx=`echo "$xmax $xmin" |awk '{print ($1-$2)/127}'`
+dz=`echo "$zmax $zmin" |awk '{print ($1-$2)/127}'`
+echo $dx $dz
 bounds=-R$xmin/$xmax/$zmin/$zmax
 proj=-JX12c
-awk '{print $1,$2,$4}' $file | gmt surface $bounds -I128+n/128+n -Vq  -Gtime.grd
-awk '{print $1,$2,$4}' time.true.out | gmt surface $bounds -I128+n/128+n -Vq   -Gtime.true.grd
+gmt convert -bi4f $file | awk '{print $1,$2,$4}' | gmt surface $bounds -I$dx/$dz -Vq  -Gtime.grd
+gmt grdinfo time.grd -C
+gmt convert -bi4f  time.homo.out |awk '{print $1,$2,$4}' | gmt surface $bounds -I$dx/$dz -Vq   -Gtime.true.grd
 gmt grdmath time.grd time.true.grd SUB time.true.grd DIV 100 MUL = error.grd
 #gmt grdmath time.grd time.true.grd SUB = error.grd
 gmt grdinfo -C *.grd
@@ -20,7 +24,7 @@ gmt grdinfo -C *.grd
 nlon=`head -1 topo.txt|awk '{print $1}'`
 nlat=`head -1 topo.txt |awk '{print $2}'`
 echo -I$nlon+n/$nlat+n
-sed -n '3,$p' topo.txt  > topo1.dat 
+sed -n '4,$p' topo.txt  > topo1.dat 
 gmt xyz2grd topo1.dat $bounds -I$nlon+n/$nlat+n -ZBLa  -Gtopo.grd
 
 # colorbar 
@@ -50,7 +54,7 @@ gmt colorbar $bounds $proj -I -Cout.cpt -Bxaf+l"Topography,m"
 
 gmt end 
 
-rm  *.grd *.cpt 
+rm  *.grd *.cpt  topo1.dat 
 
 # error bar
 
