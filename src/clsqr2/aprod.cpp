@@ -14,7 +14,7 @@
  * @param indptr shape(m+1)
  * @param nproc # of procs used
  */
-void aprod1(int m,int n,const real_t *x,real_t* restrict y,
+void aprod1(int m,int n,const real_t *x,real_t* __restrict y,
            const real_t* val, const int* indices,
            const int* indptr,int nproc)
 {   
@@ -70,7 +70,7 @@ void aprod1(int m,int n,const real_t *x,real_t* restrict y,
  * @param indptr shape(m+1)
  * @param nproc # of procs used
  */
-void aprod2(int m,int n,real_t* restrict x,const real_t* y,
+void aprod2(int m,int n,real_t* __restrict x,const real_t* y,
            const real_t* val, const int* indices,
            const int* indptr,int nproc)
 {

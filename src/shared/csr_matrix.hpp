@@ -60,7 +60,7 @@ public:
     // destructor
     ~csr_matrix();
 
-    void lsqr_solver(const float* restrict b, float * restrict x,LSQRDict &dict) const;
+    void lsqr_solver(const float* __restrict b, float * __restrict x,LSQRDict &dict) const;
 
     void read_binary(const char *filename);
     void write_binary(const char *filename) const;
