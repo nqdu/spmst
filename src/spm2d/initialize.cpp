@@ -13,8 +13,8 @@
  * @return  # of unique points
  */
 static int
-get_unique(const float* restrict x, const float* restrict z, 
-           int* restrict index, int n)
+get_unique(const float* __restrict x, const float* __restrict z, 
+           int* __restrict index, int n)
 {
     // get min and max value
     float xmin = x[0],xmax = x[0];
@@ -263,7 +263,6 @@ initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,b
             ipt += 1;
         }
     }}
-
     int npts = (NPTX - 2) * nelemx * (nelemy + 1) + 
                 (NPTZ-2) * nelemy * (nelemx +1) + 
                 (nelemx + 1) * (nelemy + 1);
@@ -451,8 +450,8 @@ void SPM2DMesh::create_graph(bool has_discon)
  * @param nr  # of stations
  */
 void SPM2DSolver::
-locate_source_stations(float evlo,float evla,const float* restrict stlo,
-                        const float* restrict stla,int nr,
+locate_source_stations(float evlo,float evla,const float* __restrict stlo,
+                        const float* __restrict stla,int nr,
                         const SPM2DMesh &mesh)
 {
     // copy source and receiver information 
