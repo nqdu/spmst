@@ -4,7 +4,7 @@ SPMST: Surface Wave Tomography with Topography
 # Table of Contents
 1. [Introduction](#Introduction)
 2. [Installation](#Installation)
-3. [Third Example](#third-example)
+3. [File Format](#File Format)
 4. [Fourth Example](#fourth-examplehttpwwwfourthexamplecom)
 
 
@@ -41,7 +41,7 @@ make -j8
 ```
 Then all the programs will be put under the directory `bin`.
 
-# 3. File format
+# 3. File Format
 All 3 programs are highly dependent on several input files: topography file, source/receivers file, and the 2D/3D velocity file. Before we go through details in each program, we talk a little bit about the file format:
 
 ## 3.1 Topography file
