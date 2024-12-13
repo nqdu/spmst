@@ -31,7 +31,14 @@ name | version|
 |[GCC](https://gcc.gnu.org/)| >=7.5|
 |[Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) | >=3.4.0 | 
 |[CMAKE](https://cmake.org/) | >=3.12.0|
-|[paraview]()||
+
+Optional:
+name |version |
+|:---:|:----:|  
+|[Paraview](https://www.paraview.org/)| >= 5.0|
+
+
+
 
 After you have downloaded the code from Github, you can compile it by using:
 ```bash
