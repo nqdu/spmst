@@ -2,12 +2,13 @@ SPMST: Surface Wave Tomography with Topography
 ==============
 
 # Table of Contents
-1. [Introduction](#Introduction)
-2. [Installation](#Installation)
-3. [File Format](#File Format)
-4. [Fourth Example](#fourth-examplehttpwwwfourthexamplecom)
+1. [Introduction](#1-introduction)
+2. [Installation](#2-installation)
+3. [File Format](#3-file-format)
+4. [Usage](#usage)
+5. [Appendix](#appendix)
 
-
+<a id="intro"></a>
 # 1. Introduction
 
 `SPMST` is a package to conduct 2-D surface wave tomography with topography by using shortest path method. In this method, surface wave is propagating along the (curved) surface.
@@ -22,7 +23,7 @@ It should be noted that this package has been tested by a limited number of user
 
 For further details, please refer to [here](https://academic.oup.com/gji/article/237/2/1235/7633451).
  
-
+<a id="install"></a>
 # 2. Installation
 Requirements:
 name | version|  
@@ -41,6 +42,7 @@ make -j8
 ```
 Then all the programs will be put under the directory `bin`.
 
+<a id="fileformat"></a>
 # 3. File Format
 All 3 programs are highly dependent on several input files: topography file, source/receivers file, and the 2D/3D velocity file. Before we go through details in each program, we talk a little bit about the file format:
 
@@ -189,6 +191,9 @@ DAMP = 0.01    # damping parameter for LSQR
 NTHREADS =  2  # # of threads used in LSQR solver 
 ```
 This is a self-explanatory file, you can add any comments in it (start with `#`). To modify it, you should leave at least `one space` in the left/right side of `=`.
+
+<a id="usage"></a>
+# Usage
 
 # Appendix
 This package is trying to minimize the frequency-dependent phase velocity related travel time:
