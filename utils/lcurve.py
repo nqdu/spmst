@@ -5,32 +5,30 @@ import matplotlib.pyplot as plt
 import sys
 
 @jit(nopython=True)
-def add_regularization(nx,ny,nz,indices,indptr,data):
+def add_smooth3D(nlon,nlat,nz,indices,indptr,data):
     # get parameters required
-    n = (nx-2) * (ny -2) * (nz  - 1) # model dimension
+    n = nlon * nlat # model dimension
     nonzeros = len(data)
     m = 0
 
     count = 0
     nar = 0
-    for k in range(nz-1):
-        for j in range(ny-2):
-            for i in range(nx-2):
-                if i==0 or i == nx-3 or j==0 or j==ny-3 or k==0 or k==nz-2:
+    for k in range(nz):
+        for i in range(nlat):
+            for j in range(nlon):
+                idx = k * nlon * nlat + i * nlon + j
+                if j ==0 or j == nlon-1 or i==0 or i == nlat-1 or k ==0 or k == nz-1:
                     rwc = count + m
-                    data[nar] = 2.0
-                    indices[nar] = k * (ny -2) * (nx -2) + j * (nx -2) + i
-                    indptr[rwc + 1] = indptr[rwc]
+                    data[nar] = 4.0
+                    indices[nar] = idx
+                    indptr[rwc + 1] = indptr[rwc] + 1
                     nar += 1
                     count += 1
                     continue
                 else:
-                    #if nar  + 7 > nonzeros:
-                        #print("please increase sparse ratio!")
-                    #    exit()
                     rwc = count + m;  # current row
                     indptr[rwc +1] = indptr[rwc] + 7
-                    clc = k * (ny -2) * (nx -2) + j * (nx -2) + i # current column
+                    clc = idx
                     data[nar] = 6.0
                     indices[nar] = clc
 
@@ -42,15 +40,15 @@ def add_regularization(nx,ny,nz,indices,indptr,data):
 
                     # y direction
                     data[nar + 3] = -1.
-                    indices[nar + 3] = clc - (nx - 2)
+                    indices[nar + 3] = clc - nlon
                     data[nar + 4] = -1.
-                    indices[nar + 4] = clc + (nx - 2)
+                    indices[nar + 4] = clc + nlon
 
                     # z direction
                     data[nar + 5] = -1.
-                    indices[nar + 5] = clc - (nx - 2) * (ny - 2)
+                    indices[nar + 5] = clc - nlon * nlat
                     data[nar + 6] = -1.
-                    indices[nar + 6] = clc + (nx - 2) * (ny - 2)
+                    indices[nar + 6] = clc + nlon * nlat
 
                     nar += 7
                     count += 1
@@ -58,28 +56,87 @@ def add_regularization(nx,ny,nz,indices,indptr,data):
 
     return nonzeros
 
+
+@jit(nopython=True)
+def add_smooth2D(nlon,nlat,indices,indptr,data):
+    # get parameters required
+    n = nlon * nlat # model dimension
+    nonzeros = len(data)
+    m = 0
+
+    count = 0
+    nar = 0
+    for j in range(nlat):
+        for i in range(nlon):
+            idx = j * nlon + i
+            if j ==0 or j == nlat-1 or i==0 or i == nlon-1:
+                rwc = count + m
+                data[nar] = 4.0
+                indices[nar] = idx
+                indptr[rwc + 1] = indptr[rwc] + 1
+                nar += 1
+                count += 1
+                continue
+            else:
+                rwc = count + m;  # current row
+                indptr[rwc +1] = indptr[rwc] + 5
+                clc = idx
+                data[nar] = 4.0
+                indices[nar] = clc
+
+                # x direction
+                data[nar + 1] = -1.0
+                indices[nar + 1] = clc - 1
+                data[nar + 2] = -1.0
+                indices[nar + 2] = clc + 1
+
+                # y direction
+                data[nar + 3] = -1.
+                indices[nar + 3] = clc - nlon
+                data[nar + 4] = -1.
+                indices[nar + 4] = clc + nlon
+
+                nar += 5
+                count += 1
+    nonzeros = nar
+
+    return nonzeros
+
 @jit(nopython=True)
 def convert(md,nx,ny,nz):
-    n = (nx-2) * (ny-2) * (nz - 1)
+    n = nx * ny * (nz - 1)
     x = np.zeros((n),dtype=float)
-    for i in range(nz):
+    for i in range(nz - 1):
         for j in range(ny):
             for k in range(nx):
-                idx = i * (ny-2) * (nx-2) + (j-1) * (nx-2) + k-1 
-                if i<nz-1 and j>=1 and j<=ny-2 and  k>=1 and k<=nx-2:
-                    #print(idx)
-                    x[idx] = md[i*ny*nx+j*nx+k]
+                idx = i * ny * nx + j * nx + k
+                x[idx] = md[i*ny*nx+j*nx+k]
     return x
 
-def get_laplacian(nx,ny,nz):
+def get_laplacian3D(nx,ny,nz):
     # generate csr type laplacian matrix 
 
-    n = (nx-2) * (ny-2) * (nz - 1)
+    n = nx * ny * (nz-1)
     nonzeros = n * 7
     indptr = np.zeros((n+1),dtype=int)
     indices = np.zeros((nonzeros),dtype=int )
     data = np.zeros((nonzeros),dtype = float)
-    nonzeros = add_regularization(nx,ny,nz,indices,indptr,data)
+    nonzeros = add_smooth3D(nx,ny,nz-1,indices,indptr,data)
+    indices = indices[:nonzeros]
+    data = data[:nonzeros]
+    smat = csr_matrix((data, indices, indptr),shape=(n,n))
+
+    return smat
+
+def get_laplacian2D(nx,ny):
+    # generate csr type laplacian matrix 
+
+    n = nx * ny
+    nonzeros = n * 5
+    indptr = np.zeros((n+1),dtype=int)
+    indices = np.zeros((nonzeros),dtype=int )
+    data = np.zeros((nonzeros),dtype = float)
+    nonzeros = add_smooth2D(nx,ny,indices,indptr,data)
     indices = indices[:nonzeros]
     data = data[:nonzeros]
     smat = csr_matrix((data, indices, indptr),shape=(n,n))
@@ -100,8 +157,8 @@ def compute_roughness(nx,ny,nz,smat,result_dir:str):
 def main():
     if len(sys.argv) == 1:
         print("compute |m-m0|, |L(m-m0)| for mod_iter1.dat")
-        print("Usage: python lcurve.py init_model result_dir")
-        print("example: python lcurve.py MOD.init results/")
+        print("Usage: python lcurve.py init_model model_dir")
+        print("example: python lcurve.py MOD.init model")
 
         exit(1)
     
@@ -113,11 +170,18 @@ def main():
     # read corner 
     f = open(init_model_str,"r")
     line = f.readline()
-    nx,ny,nz = map(lambda x: int(x), line.split()[:3])
+    info = line.split()
+    if len(info) < 3:
+        print("2-D case ...")
+        nx,ny = map(lambda x: int(x), line.split()[:2])
+        nz = 2
+        smat = get_laplacian2D(nx,ny)
+    else:
+        print("3-D case ...")
+        nx,ny,nz = map(lambda x: int(x), line.split()[:3])
+        smat = get_laplacian3D(nx,ny,nz)
     f.close()
 
-    # get laplacian
-    smat = get_laplacian(nx,ny,nz)
 
     # get roughness
     r_smooth,r_damp = compute_roughness(nx,ny,nz,smat,result_dir)

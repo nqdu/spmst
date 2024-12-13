@@ -69,9 +69,9 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src/spmst3D)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/spmst2D)
 
 # exe
-add_executable(tomo3D ${PROJECT_SOURCE_DIR}/src/spmst3D/main.cpp)
+add_executable(tomo3d ${PROJECT_SOURCE_DIR}/src/spmst3D/main.cpp)
 add_executable(syn2d ${PROJECT_SOURCE_DIR}/src/spm2d/main.cpp)
-add_executable(tomo2D ${PROJECT_SOURCE_DIR}/src/spmst2D/main.cpp)
-target_link_libraries(tomo3D spmst3D spm2d swd share lsqr OpenMP::OpenMP_CXX)
+add_executable(tomo2d ${PROJECT_SOURCE_DIR}/src/spmst2D/main.cpp)
+target_link_libraries(tomo3d spmst3D spm2d swd share lsqr OpenMP::OpenMP_CXX)
 target_link_libraries(syn2d spm2d share lsqr OpenMP::OpenMP_CXX)
-target_link_libraries(tomo2D spmst2D spm2d swd share lsqr OpenMP::OpenMP_CXX)
+target_link_libraries(tomo2d spmst2D spm2d swd share lsqr OpenMP::OpenMP_CXX)

@@ -162,7 +162,7 @@ write_vtk(const char *vtkfile) const
     fprintf(fp,"SCALARS Velocity float\n");
     fprintf(fp,"LOOKUP_TABLE default\n");
     for(int inode = 0; inode < nptstot; inode ++){
-        fprintf(fp,"%f\n",flag_val[inode]);
+        fprintf(fp,"%g\n",flag_val[inode]);
     }
     fprintf(fp,"\n");
 

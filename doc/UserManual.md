@@ -221,7 +221,7 @@ This program is to synthesize frequency-dependent phase velocity travel time for
 Usage: ./syn2d veloc2d.txt surfdata.txt topo.txt 
 ```
 Input files:
-- `veloc2d.txt` [2D observation file](#34-2d-observation-file).
+- `veloc2d.txt` [2D velocity file](#32-2d-velcity-file).
 - `surfdata.txt` [source receiver pair](#34-2d-observation-file). This program only support `1` source/receiver pair.
 - `topo.txt` [Topography file](#31-topography-file).
 
