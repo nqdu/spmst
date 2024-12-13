@@ -5,10 +5,25 @@ SPMST: Surface Wave Tomography with Topography
 1. [Introduction](#1-introduction)
 2. [Installation](#2-installation)
 3. [File Format](#3-file-format)
-4. [Usage](#usage)
-5. [Appendix](#appendix)
+    - 3.1 [Topography File](#31-topography-file)
+    - 3.2 [2D Velocity File](#32-2d-velcity-file)
+    - 3.3 [3D Velocity File](#33-3d-velocity-file)
+    - 3.4 [2D Observation File](#34-2d-observation-file)
+    - 3.5 [3D Observation File](#35-3d-observation-file)
+    - 3.5 [Inverse Problem File](#36-inverse-problem-file)
+4. [Usage](#4-usage)
+    - 4.1 [syn2d](#41-syn2d)
+    - 4.2 [tomo2d](#42-tomo2d)
+    - 4.3 [tomo3d](#43-tomo3d)
+5. [Advanced Options](#5-advanced-options)
+    - 5.1 [OpenMP](#51-openmp)
+    - 5.2 [Empirical Relation](#52-empirical-relations)
+    - 5.3 [Random Seed](#53-random-seed)
+    - 5.4 [Warnings](#54-warnings)
+    - 5.5 [L-curve Analysis](#55-l-curve-analysis)
+    - 5.6 [Tips for Topography](#56-tips-for-topography)
+6. [Appendix](#appendix)
 
-<a id="intro"></a>
 # 1. Introduction
 
 `SPMST` is a package to conduct 2-D surface wave tomography with topography by using shortest path method. In this method, surface wave is propagating along the (curved) surface.
@@ -127,7 +142,7 @@ for iz in range(nz):
             f.write("%f\n" % (veloc[iz,iy,ix]))
 ```
 
-## 3.4 2D Phase velocity file
+## 3.4 2D Observation File
 here is the one block (source-receiver pair) in this file:
 ```
 # 89.488540 39.099072 4
@@ -142,7 +157,7 @@ This file contains the source/receiver location and phase velocity observations 
 
 You should list all the blocks you required in this file. Another point you should note that this program `cannot` handle group velocity observations.
 
-## 3.5 3D Dispersion File
+## 3.5 3D Observation File
 This file contains the period used for each type of surface wave and the source/receiver location and phase velocity observations at a each period, each wave type. Here is the template:
 ```
 19                                # ntRc (followed by periods)
@@ -160,7 +175,7 @@ This file contains the period used for each type of surface wave and the source/
 106.800200 33.229300 3.057500
 ```
 Obviously this file contains a header and data blocks. The header parameters are:
-- The first line contains the size of the period array for Rayleigh wave phase velocity. The if this number is not 0, the following line include the period vector (in s).
+- The first line contains the size of the period array for Rayleigh wave phase velocity. If this number is not 0, the following line should be the period vector (in s).
 - The following several lines contain the same for Rayleigh wave group velocity, Love wave's phase velocity and Love wave's group velocity, respectively.
 
 The rest of this file is the description for each source receiver pair at a given period of a single wave type. The source is started with a `#`:
@@ -171,7 +186,7 @@ The rest of this file is the description for each source receiver pair at a give
 - `nsta` number of stations for this pair
 - `pid` is the index of the period in the period array, start from 0.
 - `wave-type` Rayleigh wave (=2) or Love wave (=1)
-- `disp-type` phase velocity (=0) or group velocity (=1)
+- `disp-type` phase velocity (=0) or group velocity (=1).
 For the template, the source line means: this block has `6` receivers, related to `Rayleigh phase velocity` at `0.2`s.
 
 Then the following `nsta` lines contains the receiver coordinates (same units with source) and the observed dispersion (in km/s).
@@ -199,11 +214,114 @@ NTHREADS =  2  # # of threads used in LSQR solver
 ```
 This is a self-explanatory file, you can add any comments in it (start with `#`). To modify it, you should leave at least `one space` in the left/right side of `=`.
 
-<a id="usage"></a>
-# Usage
+# 4. Usage
+## 4.1 `syn2d`
+This program is to synthesize frequency-dependent phase velocity travel time for a given 2-D velocity, topography and source-receiver pair. 
+```code
+Usage: ./syn2d veloc2d.txt surfdata.txt topo.txt 
+```
+Input files:
+- `veloc2d.txt` [2D observation file](#34-2d-observation-file).
+- `surfdata.txt` [source receiver pair](#34-2d-observation-file). This program only support `1` source/receiver pair.
+- `topo.txt` [Topography file](#31-topography-file).
+
+Output files:
+- `ray.dat` ray-paths for this source/receiver pair. It can be used directly by `gmt plot`.
+- `time.out` travel time field with shape `(npts,4)`, it's a binary file and can be read by `-bi4f` option in GMT.
+- `time.homo.out` travel time field (by using average velocity) with shape `(npts,4)`, it's a binary file and can be read by `-bi4f` option in GMT.
+- `topo.vtk` VTK file of topography, it can be displayed by `paramview`.
+
+## 4.2 `tomo2d`
+```
+./this paramfile datafile topofile initmod (truemod)
+```
+Input files:
+- `paramfile` [file with inversion parameters](#36-inverse-problem-file).
+- `datafile` [source receiver pair](#34-2d-observation-file).
+- `topofile` [Topography file](#31-topography-file).
+- `initmod` Initial model, belong to [2D velocity file](#32-2d-velcity-file)
+- `truemod` True model ([2D velocity file](#32-2d-velcity-file)). This file is only used when `SYN_TEST` is set to `1` in `paramfile`.
+
+Output files:
+- `model/mod_iter*` models for each iteration, the index is started from `ITER_CURRENT` in `paramfile`.The columns are `[x,y,phase_velocity]`
+- `model/disper_iter*` dispersions for each iteration. The columns are :`[xs,ys, xr,yr, distance, synthetic_time]`
+- `model/disper_obs.dat` observed dispersions The columns are :`[xs,ys, xr,yr, distance, obs_time]`
+
+## 4.3 `tomo3d`
+```
+./this paramfile datafile topofile initmod (truemod)
+```
+Input files:
+- `paramfile` [file with inversion parameters](#36-inverse-problem-file).
+- `datafile` [source receiver pair](#35-3d-observation-file).
+- `topofile` [Topography file](#31-topography-file).
+- `initmod` Initial model, belong to [3D velocity file](#33-3d-velocity-file)
+- `truemod` True model ([3D velocity file](#33-3d-velocity-file)). This file is only used when `SYN_TEST` is set to `1` in `paramfile`.
+
+Output files:
+- `model/mod_iter*` models for each iteration, the index is started from `ITER_CURRENT` in `paramfile`. The columns are `[x,y,Vs]`
+- `model/disper_iter*` dispersions for each iteration. The columns are :`[xs,ys, xr,yr, distance, synthetic_time]`
+- `model/disper_obs.dat` observed dispersions The columns are :`[xs,ys, xr,yr, distance, obs_time]`
+
+# 5 Advanced Options
+## 5.1 OpenMP 
+`tomo2d` and `tomo3d` can be executed on a single node with `OpenMP` support. To choose the number of threads used, you can set this environment variable before running：
+```
+export OMP_NUM_THREADS=4
+```
+The maximum number can be half of the following output:
+```
+cat /proc/cpuinfo |grep cores |wc −l
+```
+
+## 5.2 Empirical Relations
+Empirical relations are utilized to connect density and 
+velocity of rocks in our program. If you have better relations 
+in your study area, you can change this relation 
+in `src/spmst3D/compute_swd.cpp` 
+```c++
+void empirical_relation(float vsz,float &vpz,float &rhoz)
+{
+    vpz = 0.9409 + 2.0947*vsz - 0.8206*pow(vsz,2)+ 
+            0.2683*pow(vsz,3) - 0.0251*pow(vsz,4);
+    rhoz = 1.6612 * vpz - 0.4721 * pow(vpz,2) + 
+            0.0671 * pow(vpz,3) - 0.0043 * pow(vpz,4) + 
+            0.000106 * pow(vpz,5);
+}
+```
+
+## 5.3 Random Seed
+To make sure we obtain same results for checkerboard test, we fix the random seed in `src/shared/gaussian.cpp`:
+```c++
+static default_random_engine e(11);
+```
+You could change `11` to other integer if required.
+
+## 5.4 Warnings
+There might be several warnings/erros raised during inversion, and this information may help you debug:
+
+The most common  warning is `WARNING:improper initial value in disper-no zero found` on the screen. Then a `fort.66` file will 
+be generated in the running directory. This error is due to 
+a strange 1-D model that the dispersion module cannot find 
+dispersion curves for this model.
+
+There are some possible reasons for this warning. If you find this problem for the first iteration, this problem may from that the format of your initial model is different from the required one. You could check the model in file `fort.66` and compare that with your model.  
+
+Another possible reason is that you choose inappropriate (`too small`) 
+Tikhonov regularization parameters (i.e. damping and smooth factors) which lead to abrupt change of previous model.
+
+## 5.5 L-curve Analysis
+I've provided a script `utils/lcurve.py`:
+```code 
+python lcurve.py MOD.init model
+```
+where `MOD.init` is your initial model and `model` is a directory generated by `tomo2d/tomo3d`. It will compute $|m_1-m_0|$ and $|L(m_1 - m_0)|$, where $L$ is the Laplacian operator (node based, means we will ignore the real units). It will automatically check if this model is 2-D or 3-D.
+
+## 5.6 Tips for topography
+This package assumes the surface wave is propagating along a curved manifold. So you should use a smooth version of topography in each program. Please try the script `utils/smooth_topo.py` to smooth your topography, and also have a look at `topo.vtk` from `syn2d`.
 
 # Appendix
-This package is trying to minimize the frequency-dependent phase velocity related travel time:
+Here is some implementation details: this package is trying to minimize the frequency-dependent phase velocity related travel time:
 ```math
 t(\omega) = \min_{P\in all ~ path}\int_{P} \frac{\mathrm{d}s}{c(\omega)}
 ```

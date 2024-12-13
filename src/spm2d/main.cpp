@@ -71,6 +71,9 @@ int main(int argc, char **argv){
     // set topography
     printf("\nreading topography from %s ...\n",topofile);
     mesh.read_topography(topofile);
+
+    // write vtk
+    mesh.write_vtk("topo.vtk");
     
     // set velocity
     printf("\nsetting velocity ...\n");
