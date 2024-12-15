@@ -114,7 +114,7 @@ write_binary(const char *filename) const
  * @param dict LSQR dict
  */
 void csr_matrix::
-lsqr_solver(const float* b, float* restrict x,LSQRDict &dict) const
+lsqr_solver(const float* b, float* __restrict x,LSQRDict &dict) const
 {
     // initialize x 
     for(int i = 0; i < MATRIX_COL; i++) x[i] = 0.0;

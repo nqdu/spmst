@@ -53,7 +53,7 @@
 */
 void
 cblas_daxpy( const int N, const real_t alpha, const real_t *X,
-             const int incX, real_t* restrict Y, const int incY)
+             const int incX, real_t* __restrict Y, const int incY)
 {
   int i;
 
@@ -93,7 +93,7 @@ cblas_daxpy( const int N, const real_t alpha, const real_t *X,
 */
 void
 cblas_dcopy( const int N, const real_t* X,
-             const int incX, real_t* restrict Y, const int incY)
+             const int incX, real_t* __restrict Y, const int incY)
 {
   int i;
   int ix = OFFSET(N, incX);
@@ -181,7 +181,7 @@ cblas_dnrm2( const int N, const real_t* X, const int incX)
   \param[in]     incX
 */
 void
-cblas_dscal(const int N, const real_t alpha, real_t* restrict X, const int incX)
+cblas_dscal(const int N, const real_t alpha, real_t* __restrict X, const int incX)
 {
     int i, ix;
 

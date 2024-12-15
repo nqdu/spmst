@@ -3,7 +3,7 @@
 
 #include "numerical.hpp"
 
-const int NPTX = 15,NPTZ = 15;
+const int NPTX = 13,NPTZ = 13;
 const int NPT2 = NPTX*2 + NPTZ*2 -4; // # of auxiliary nodes in x and z direction
 const float earth = 6371.0;
 
@@ -48,7 +48,6 @@ public:
     float compute_length(float x1,float y1,float z1,float x2,float y2,float z2) const;
     
     // IO 
-    void write_raypath(const char *filename) const;
     void write_velocity(const char *filename) const;
     void write_vtk(const char *vtkfile) const;
 
@@ -85,13 +84,13 @@ private:
 
     // binary tree
     int treesize;
-    std::vector<int> btree;
+    std::vector<std::array<float,2>> btree;
     Eigen::Array<bool,-1,1> is_visited; // shape(nptstot)
 
 public:
     //functions
-    void locate_source_stations(float evlo,float evla,const float* restrict stlo,
-                                const float* restrict stla,int nr,
+    void locate_source_stations(float evlo,float evla,const float* __restrict stlo,
+                                const float* __restrict stla,int nr,
                                 const SPM2DMesh &mesh);
     SPM2DSolver(const SPM2DMesh &mesh,const fmat2 &veloc);
     void initialize(const SPM2DMesh &mesh,const fmat2 &veloc);

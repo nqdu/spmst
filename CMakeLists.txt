@@ -20,7 +20,7 @@ if(NOT DEFINED ${var})
 set(${var} ${val})
 endif()
 endmacro()
-setDefault(EIGEN_INC   "/Users/nqdu/software/eigen-3.4.0")
+setDefault(EIGEN_INC   "~/software/eigen-3.4.0")
 
 # project
 project(SPMTOMO LANGUAGES CXX Fortran)
@@ -32,7 +32,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/build/obj)
 
 ################# cmake setup #################
-set(CMAKE_CXX_FLAGS  "-Wall -g -Drestrict=__restrict -DEIGEN_DONT_PARALLELIZE")
+set(CMAKE_CXX_FLAGS  "-Wall -g -DEIGEN_DONT_PARALLELIZE")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
   set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -march=native -ffast-math")
@@ -69,9 +69,9 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src/spmst3D)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/spmst2D)
 
 # exe
-add_executable(tomo3D ${PROJECT_SOURCE_DIR}/src/spmst3D/main.cpp)
-add_executable(syn ${PROJECT_SOURCE_DIR}/src/spm2d/main.cpp)
-add_executable(tomo2D ${PROJECT_SOURCE_DIR}/src/spmst2D/main.cpp)
-target_link_libraries(tomo3D spmst3D spm2d swd share lsqr OpenMP::OpenMP_CXX)
-target_link_libraries(syn spm2d share lsqr OpenMP::OpenMP_CXX)
-target_link_libraries(tomo2D spmst2D spm2d swd share lsqr OpenMP::OpenMP_CXX)
+add_executable(tomo3d ${PROJECT_SOURCE_DIR}/src/spmst3D/main.cpp)
+add_executable(syn2d ${PROJECT_SOURCE_DIR}/src/spm2d/main.cpp)
+add_executable(tomo2d ${PROJECT_SOURCE_DIR}/src/spmst2D/main.cpp)
+target_link_libraries(tomo3d spmst3D spm2d swd share lsqr OpenMP::OpenMP_CXX)
+target_link_libraries(syn2d spm2d share lsqr OpenMP::OpenMP_CXX)
+target_link_libraries(tomo2d spmst2D spm2d swd share lsqr OpenMP::OpenMP_CXX)

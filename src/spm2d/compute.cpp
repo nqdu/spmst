@@ -1,6 +1,6 @@
 #include "spm2d.hpp"
 #include "shared/bilinear.hpp"
-
+#include <algorithm>
 /**
  * @brief compute strait line distance by spherical coordinates
  * 
@@ -61,6 +61,8 @@ compute_traveltime(const SPM2DMesh &mesh,const fmat2 &veloc)
     is_fixed.setConstant(false);
     is_visited.setConstant(false);
     ttime.setConstant(inf);
+    btree.resize(0);
+    btree.reserve(mesh.nptstot);
 
     // set initial time by using source location
     treesize = 0;
@@ -79,7 +81,7 @@ compute_traveltime(const SPM2DMesh &mesh,const fmat2 &veloc)
         is_visited[inode] = true;
 
         // update btree
-        btree[treesize] = inode;
+        btree.push_back({(float)inode,t});
         treesize += 1;
 
         // update comming node
@@ -131,50 +133,6 @@ compute_traveltime(const SPM2DMesh &mesh,const fmat2 &veloc)
     }
 }
 
-/**
- * @brief Make a Min heap  
- * 
- * @param ttime travel timetime matrix, shape(nptstot)
- * @param ibool connectivity matrix, shape(nelmnts,NPT2)
- * @param btree vector of FMMIndex, shape
- * @param TreeSize current treesize
- */
-static void 
-create_minheap(const fvec &ttime,std::vector<int> &btree,int treesize)
-{
-    for(int i = treesize / 2 -1; i >= 0; i --){
-        int childid = 2 * i + 1;
-        int parentid = i;
-        int inode_p =  btree[parentid];
-        float timepar = ttime[inode_p];
-        int inode_c  = btree[childid];
-        float timechi = ttime[inode_c];
-
-        while(childid <= treesize-1){
-            if(childid < treesize - 1){
-                int inode_c1 = btree[childid+1];
-                float time_c1 = ttime[inode_c1];
-                if(timechi > time_c1){
-                    childid += 1;
-                    inode_c = inode_c1;
-                    timechi = time_c1;
-                }
-            }
-            if(timepar > timechi){
-                std::swap(btree[parentid],btree[childid]);
-                parentid = childid;
-                childid = parentid * 2 + 1;
-                if(childid < treesize){
-                    inode_c  = btree[childid];
-                    timechi = ttime[inode_c];
-                }
-            }
-            else{
-                break;
-            }
-        }
-    }
-}
 
 /**
  * @brief apply Dijkstra's Algorithm to compute travel time
@@ -184,11 +142,21 @@ create_minheap(const fvec &ttime,std::vector<int> &btree,int treesize)
 void SPM2DSolver::
 dijkstra_cpu(const SPM2DMesh &mesh)
 {
-    while(treesize > 0) {
-        create_minheap(ttime,btree,treesize);
-        int inode = btree[0];
-        std::swap(btree[treesize-1],btree[0]);
-        treesize -= 1;
+    // define a compare function
+    auto comp = [&](std::array<float,2> &a, std::array<float,2> &b) {
+        return a[1] > b[1];
+    };
+
+    // make heap for source neighboring points
+    std::make_heap(btree.begin(),btree.end(),comp);
+    while(btree.size() > 0) {
+        // remove the last one 
+        std::pop_heap(btree.begin(),btree.end(),comp);
+        auto temp = btree[btree.size() - 1];
+        int inode = temp[0];
+        float t0 = temp[1];
+        btree.pop_back();
+        if(t0 > ttime[inode]) continue;
         is_fixed[inode] = true;
 
         // compute adjacent nodes to update traveltime
@@ -203,20 +171,15 @@ dijkstra_cpu(const SPM2DMesh &mesh)
 
             // update traveltime
             float t = ttime[inode] + weights[i];
-            if(is_visited[inode_a]) {
-                if(t < ttime[inode_a]) {
-                    ttime[inode_a] = t;
-                    comming_node(inode_a,0) = ielem;
-                    comming_node(inode_a,1) = mesh.adjncy_self_ipt[i];
-                }
-            }
-            else {
+            if(!is_visited[inode_a] || t < ttime[inode_a]) {
+                is_visited[inode_a] = true;
                 ttime[inode_a] = t;
                 comming_node(inode_a,0) = ielem;
                 comming_node(inode_a,1) = mesh.adjncy_self_ipt[i];
-                btree[treesize] = inode_a;
-                is_visited[inode_a] = true;
-                treesize += 1;
+
+                // add new point to btree
+                btree.push_back({(float)inode_a,t});
+                std::push_heap(btree.begin(),btree.end(),comp);
             }
         }
     }

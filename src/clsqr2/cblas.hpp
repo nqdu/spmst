@@ -43,11 +43,11 @@ enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
 
 void
 cblas_daxpy( const int N, const real_t alpha, const real_t *X,
-             const int incX, real_t* restrict Y, const int incY);
+             const int incX, real_t* __restrict Y, const int incY);
 
 void
 cblas_dcopy( const int N, const real_t* X,
-             const int incX, real_t* restrict Y, const int incY);
+             const int incX, real_t* __restrict Y, const int incY);
 
 
 real_t
@@ -58,7 +58,7 @@ real_t
 cblas_dnrm2( const int N, const real_t* X, const int incX);
 
 void
-cblas_dscal(const int N, const real_t alpha, real_t* restrict X, const int incX);
+cblas_dscal(const int N, const real_t alpha, real_t* __restrict X, const int incX);
 
 void
 cblas_dgemv(const enum CBLAS_ORDER order,

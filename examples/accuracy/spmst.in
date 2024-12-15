@@ -1,5 +1,0 @@
-# study region
--5 -5 # lonmin latmin
-5  5  # lonmax latmax
-20 20 #  of elements in lon/lat direction
-0       # use spherical coordinates

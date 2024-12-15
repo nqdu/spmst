@@ -417,7 +417,7 @@ void lsqr(
           const int* indptr,
           real_t damp,
           const real_t* b,     // len = m
-          real_t* restrict x,
+          real_t* __restrict x,
           real_t atol,
           real_t btol,
           real_t conlim,

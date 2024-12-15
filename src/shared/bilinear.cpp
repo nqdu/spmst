@@ -9,7 +9,7 @@
  * @return float 
  */
 void bilinear(const float* x, const float* y,int nx,int ny,
-                float x0,float y0,int &ix,int &iy,float* restrict coef)
+                float x0,float y0,int &ix,int &iy,float* __restrict coef)
 {
     float dx = x[1] - x[0], dy = y[1] - y[0];
     ix = (x0 - x[0]) / dx, iy = (y0 - y[0]) / dy;

@@ -30,6 +30,10 @@ int main(int argc, char* argv[]){
     tomo.read_obsdata(datafile.c_str());
     tomo.read_model(modfile.c_str(),tomo.velinit,true);
     if(tomo.param.ifsyn){
+        if(argc !=6) {
+            printf("you should input a truemod when enabling SYN_TEST!\n");
+            exit(1);
+        }
         tomo.read_model(modtrue.c_str(),tomo.veltrue);
     }
     tomo.read_topography(topofile.c_str());
