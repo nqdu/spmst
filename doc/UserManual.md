@@ -30,7 +30,7 @@ SPMST: Surface Wave Tomography with Topography
 
 This manual provides guidance on using the `SPMST` package to perform 2D/3D surface wave ray-based tomography of shear wave velocities. These package includes 3 programs:
 
-- Synthesize phase velocity travel time for a given 2-D phase velocity map and topography.
+- Synthesize phase velocity travel time for a given 2-D phase velocity map, and a given topography.
 - 2-D phase velocity tomography (from dispersion to phase maps).
 - 3-D direct inversion of both phase/group dispersion curves. 
 
@@ -64,7 +64,6 @@ make -j8
 ```
 Then all the programs will be put under the directory `bin`.
 
-<a id="fileformat"></a>
 # 3. File Format
 All 3 programs are highly dependent on several input files: topography file, source/receivers file, and the 2D/3D velocity file. Before we go through details in each program, we talk a little bit about the file format:
 

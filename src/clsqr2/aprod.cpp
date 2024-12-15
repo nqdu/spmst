@@ -18,15 +18,6 @@ void aprod1(int m,int n,const real_t *x,real_t* __restrict y,
            const real_t* val, const int* indices,
            const int* indptr,int nproc)
 {   
-    // serial code
-    if(nproc == 1) {
-        for(int i = 0; i < m;i++){
-        for(int j = indptr[i]; j < indptr[i+1]; j++){
-            y[i] += val[j] * x[indices[j]];
-        }}
-        return;
-    }
-
     // backup global omp
     int nproc_bak = 1;
     #pragma omp parallel 
@@ -35,25 +26,12 @@ void aprod1(int m,int n,const real_t *x,real_t* __restrict y,
     }
     omp_set_num_threads(nproc);
 
-    // new ytmp
-    real_t *ytmp = new real_t[nproc * m]();
-    #pragma omp parallel for shared(ytmp)
-    for(int irank = 0; irank < nproc; irank ++) {
-        for(int i = irank; i < m; i += nproc) {
-        for(int j = indptr[i]; j < indptr[i+1]; j ++ ) {
-            ytmp[irank * m + i] += val[j] * x[indices[j]]; 
-        }}
-    }
-
-    // copy to global
-    for(int i = 0; i < m; i ++) {
-        double s = 0.;
-        for(int irank = 0; irank < nproc; irank ++) {
-            s += ytmp[irank * m + i];
+    #pragma omp parallel for shared(indptr,indices,x,y,val)
+    for(int i = 0; i < m;i++){
+        for(int j = indptr[i]; j < indptr[i+1]; j++){
+            y[i] += val[j] * x[indices[j]];
         }
-        y[i] += s;
     }
-    delete [] ytmp;
 
     // set global nprocs back
     omp_set_num_threads(nproc_bak);

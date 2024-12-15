@@ -12,7 +12,7 @@ public:
     float smooth,damp; // parameters for lsmr
     int nthreads;
 
-    // noise level
+    // noise level 
     float noiselevel; 
 
     // read parameter files
