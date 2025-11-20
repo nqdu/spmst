@@ -109,7 +109,7 @@ compute_traveltime(const SPM2DMesh &mesh,const fmat2 &veloc)
                                             stalocs(ir,0),stalocs(ir,1),
                                             stalocs(ir,2));
             ttime_recv[ir] = dist * 0.5 * (1. / vr + 1. / vs);
-            break;
+            continue;
         }
 
         // find minimum travel time
@@ -256,12 +256,20 @@ frechet_kernel(int ir,const SPM2DMesh &mesh,const fmat2 &veloc, fvec &fdm) const
         ielem1 = comming_node(inode1,0), ipt1 = comming_node(inode1,1);
     }
 
-    // contribution from source segment
+// contribution from source segment
     float dist = mesh.compute_length(x0,y0,z0,xsource,ysource,zsource);
     float term0 = -0.5 * dist / (v0 * v0);
     float term1 = -0.5 * dist / (vs * vs);
-    int inode0 = ibool(ielem0,ipt0);
-    fdm[inode0] += term0;
+    if(ipt0 == -1) { // the station is in source cell 
+        for(int i = 0; i < 4; i++){
+            int inode0 = ibool(ielem0,i);
+            fdm[inode0] += coefr[i] * term0;
+        }
+    }
+    else{
+        int inode0 = ibool(ielem0,ipt0);
+        fdm[inode0] += term0;
+    }
     for(int i = 0; i < 4 ;i++){
         int inode1 = ibool(ielem_src,i);
         fdm[inode1] += coefs[i] * term1;
