@@ -31,8 +31,7 @@ jobs:
           CXX: g++
           FC: gfortran
           CXXFLAGS: ""
-          EIGEN_INC: ${{ github.workspace }}/eigen-5.0.0
-        run: cmake -S . -B build
+        run: cmake -S . -B build -DEIGEN_INC=${{ github.workspace }}/eigen-5.0.0
 
       - name: Build
         run: cmake --build build -j$(nproc)
