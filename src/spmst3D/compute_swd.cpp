@@ -5,6 +5,7 @@
 #include "shared/csr_matrix.hpp"
 #include "shared/parallel_tools.hpp"
 #include <fstream>
+#include <vector>
 #include <omp.h>
 
 /**
@@ -282,19 +283,19 @@ Kernel1D(const float *vs,const float *vp,const float *rho,
         }   
     }
     if(kmaxRg > 0){
-        double cp[kmaxRg],t1[kmaxRg],t2[kmaxRg],c1[kmaxRg],c2[kmaxRg];
+        std::vector<double> cp(kmaxRg),t1(kmaxRg),t2(kmaxRg),c1(kmaxRg),c2(kmaxRg);
         double dt = 0.01;
         for(int i=0;i<kmaxRg;i++){
             t1[i] = tRg[i] * (1.0 + 0.5 * dt);
             t2[i] = tRg[i] * (1.0 - 0.5 * dt);
         }
-        surfdisp(rthk,rvp,rvs,rrho,rmax,tRg.data(),cp,kmaxRg,"Rc",mode,sphere);
-        surfdisp(rthk,rvp,rvs,rrho,rmax,t1,c1,kmaxRg,"Rc",mode,sphere);
-        surfdisp(rthk,rvp,rvs,rrho,rmax,t2,c2,kmaxRg,"Rc",mode,sphere);
+        surfdisp(rthk,rvp,rvs,rrho,rmax,tRg.data(),cp.data(),kmaxRg,"Rc",mode,sphere);
+        surfdisp(rthk,rvp,rvs,rrho,rmax,t1.data(),c1.data(),kmaxRg,"Rc",mode,sphere);
+        surfdisp(rthk,rvp,rvs,rrho,rmax,t2.data(),c2.data(),kmaxRg,"Rc",mode,sphere);
         for(int i=0;i<kmaxRg;i++){
             int k = i + kmaxRc;
-            sregnpu_(rthk,rvp,rvs,rrho,rmax,&tRg[i],cp+i,vdis+k,
-                     ur,uz,tr,tz,t1+i,c1+i,t2+i,c2+i,dcdar,
+            sregnpu_(rthk,rvp,rvs,rrho,rmax,&tRg[i],cp.data()+i,vdis+k,
+                     ur,uz,tr,tz,t1.data()+i,c1.data()+i,t2.data()+i,c2.data()+i,dcdar,
                      dcdbr,dcdhr,dcdrr,dudar,dudbr,dudhr,dudrr,iflsph);
             convert_param(dep,vp,vs,rho,nz,sublayer,
                         rthk,rvp,rvs,rrho,rmax,dudar,kvp+k*nz);
@@ -324,22 +325,22 @@ Kernel1D(const float *vs,const float *vp,const float *rho,
         }  
     }
     if(kmaxLg > 0){
-        double cp[kmaxLg],t1[kmaxLg],t2[kmaxLg],c1[kmaxLg],c2[kmaxLg];
+        std::vector<double> cp(kmaxLg),t1(kmaxLg),t2(kmaxLg),c1(kmaxLg),c2(kmaxLg);
         double dt = 0.01;
         for(int i=0;i<kmaxLg;i++){
             t1[i] = tLg[i] * (1.0 + 0.5 * dt);
             t2[i] = tLg[i] * (1.0 - 0.5 * dt);
         }
-        surfdisp(rthk,rvp,rvs,rrho,rmax,tLg.data(),cp,
+        surfdisp(rthk,rvp,rvs,rrho,rmax,tLg.data(),cp.data(),
                 kmaxLg,"Lc",mode,sphere);
-        surfdisp(rthk,rvp,rvs,rrho,rmax,t1,c1,
+        surfdisp(rthk,rvp,rvs,rrho,rmax,t1.data(),c1.data(),
                 kmaxLg,"Lc",mode,sphere);
-        surfdisp(rthk,rvp,rvs,rrho,rmax,t2,c2,
+        surfdisp(rthk,rvp,rvs,rrho,rmax,t2.data(),c2.data(),
                 kmaxLg,"Lc",mode,sphere);
         for(int i=0;i<kmaxLg;i++){
             int k = i + kmaxRc + kmaxRg + kmaxLc;
-            slegnpu_(rthk,rvs,rrho,rmax,&tLg[i],cp+i,vdis+k,
-                    ur,tr,t1+i,c1+i,t2+i,c2+i,dcdbr,dcdhr,dcdrr,
+            slegnpu_(rthk,rvs,rrho,rmax,&tLg[i],cp.data()+i,vdis+k,
+                    ur,tr,t1.data()+i,c1.data()+i,t2.data()+i,c2.data()+i,dcdbr,dcdhr,dcdrr,
                     dudbr,dudhr,dudrr,iflsph);
             convert_param(dep,vp,vs,rho,nz,sublayer,
                         rthk,rvp,rvs,rrho,rmax,dudbr,kvs+k*nz);

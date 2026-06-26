@@ -1,0 +1,46 @@
+# Build directories
+build/
+Build/
+out/
+cmake-build-*/
+
+# CMake artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Compiled object files
+*.o
+*.obj
+*.lo
+*.slo
+*.mod
+*.smod
+
+# Compiled libraries
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.lib
+
+# Executables
+bin/
+*.exe
+*.out
+
+# Editor / OS files
+.DS_Store
+*.swp
+*~
+.idea/
+
+# VSCode (keep shared config, ignore local overrides)
+.vscode/*
+!.vscode/settings.json
+!.vscode/c_cpp_properties.json

@@ -8,7 +8,7 @@ public:
     int ifsyn; // if or not do checkerboard test
     int iter_cur; // current iteration number (start from 0)
 
-    // lsmr
+    // lsqr
     float smooth,damp; // parameters for lsmr
     int nthreads;
 
