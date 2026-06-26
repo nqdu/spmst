@@ -20,9 +20,8 @@ public:
     // inverse params
     InverseParamsBase param;
 
-private: 
+private:
     std::vector<float> model_lon,model_lat;
-    bool is_spherical; // if it's spherical coordinates
 
 public:
     SPMST2D() {};

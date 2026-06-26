@@ -393,7 +393,7 @@ synthetic(const fmat3 &vel,fvec &tsyn)  const
         const int sublayer = 3;
         disp1D(vs.data(),vp.data(),rho.data(),z.data(),nz,
                 sublayer,tRc,tRg,tLc,tLg,cg.data(),cgout.data(),
-                is_spherical);
+                param.is_spherical);
         
         // copy disp curve to vel2d
         vc.col(ii) = cg.cast<float>();
@@ -487,7 +487,7 @@ compute_frechet(const fmat3 &vel,fvec &tsyn,const char *outfile) const
         const int sublayer = 3;
         Kernel1D(vs.data(),vp.data(),rho.data(),z.data(),nz,
                  sublayer,tRc,tRg,tLc,tLg,cg.data(),cgout.data(),
-                 kvs.data(),kvp.data(),krho.data(),this->is_spherical);
+                 kvs.data(),kvp.data(),krho.data(),this->param.is_spherical);
         
         // copy disp curve to vel2d
         for(int it = 0; it < nt; it ++){

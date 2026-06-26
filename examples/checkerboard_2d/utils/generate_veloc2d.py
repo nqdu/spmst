@@ -7,7 +7,6 @@ ymin,ymax = 38.9,   39.3
 nlon,nlat = 40,40
 nlevelx = 0.5
 nlevely = 0.5
-use_sph = True
 
 # write velocity
 v = np.zeros((nlat,nlon))
@@ -16,7 +15,6 @@ v += 3.0
 f = open("velocinit.in","w")
 f.write("%d %d\n" %(nlon,nlat))
 f.write("%f %f\n%f %f\n" %(xmin,xmax,ymin,ymax))
-f.write("%d\n" %(use_sph))
 for j in range(nlat):
     for k in range(nlon):
         f.write("%f\n"%(v[j,k]))
@@ -40,7 +38,6 @@ plt.savefig("veloc2d.jpg")
 f = open("veloctrue.in","w")
 f.write("%d %d\n" %(nlon,nlat))
 f.write("%f %f\n%f %f\n" %(xmin,xmax,ymin,ymax))
-f.write("%d\n" %(use_sph))
 for j in range(nlat):
     for k in range(nlon):
         f.write("%f\n"%(vtrue[j,k]))

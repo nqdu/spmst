@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS             ${CXXFLAGS})
 ################## dependencies ##################
 # preferred installation prefix of dependencies
 set(EIGEN_INC                 ${EIGEN_INC})
+set(SPMST_NPT_AUX               ${SPMST_NPT_AUX})
 
 # set default values
 macro(setDefault var val)
@@ -21,6 +22,7 @@ set(${var} ${val})
 endif()
 endmacro()
 setDefault(EIGEN_INC   "~/software/eigen-5.0.0")
+setDefault(SPMST_NPT_AUX 9)
 
 # project
 project(SPMTOMO LANGUAGES CXX Fortran)
@@ -46,6 +48,9 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -march=native -ffixed-line-length-none")
 endif()
+
+# add define macro for NPT_AUX
+add_definitions(-DSPMST_NPT_AUX=${SPMST_NPT_AUX})
 
 set(CMAKE_VERBOSE_MAKEFILE off)
 

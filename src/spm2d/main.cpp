@@ -7,17 +7,20 @@
 
 int main(int argc, char **argv){
     // check input args
-    if(argc != 4){
-        printf("Usage: ./syn veloc.txt surfdata.txt topo.txt\n");
+    if(argc < 4 || argc > 5){
+        printf("Usage: ./syn veloc.txt surfdata.txt topo.txt [use_sph=1]\n");
         exit(1);
     }
     const char *velocfile = argv[1], *datafile=argv[2], *topofile = argv[3];
+    int use_sph = 1;
+    if(argc == 5){
+        use_sph = atoi(argv[4]);
+    }
 
     // read header file
     int nx,nz;
-    float zmin,xmin,zmax,xmax;
-    float dx,dz;
-    int use_sph;
+    double zmin,xmin,zmax,xmax;
+    double dx,dz;
     printf("\nreading velocity file %s...\n",velocfile);
     std::ifstream fpin; fpin.open(velocfile);
     if(!fpin.is_open()){
@@ -27,7 +30,6 @@ int main(int argc, char **argv){
     read_file_param(fpin,nx,nz);
     read_file_param(fpin,xmin,xmax);
     read_file_param(fpin,zmin,zmax);
-    read_file_param(fpin,use_sph);
     dx = (xmax - xmin) / nx; dz = (zmax - zmin) / nz;
     if(use_sph == 1){
         printf("using spherical coordinates ...\n");
@@ -56,7 +58,7 @@ int main(int argc, char **argv){
     fpin.close();
 
     // initialize mesh
-    SPM2DMesh mesh(xmin,zmin,dx,dz,nx*1.2,nz*1.2,use_sph==1);
+    SPM2DMesh mesh(xmin,zmin,dx,dz,nx,nz,use_sph==1);
     mesh.create_graph();
 
     // set velocity

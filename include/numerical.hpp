@@ -15,6 +15,7 @@
 
 const float inf = std::numeric_limits<float>::infinity();
 typedef Eigen::Array<float,-1,-1,Eigen::RowMajor> fmat2;
+typedef Eigen::Array<double,-1,-1,Eigen::RowMajor> dmat2;
 typedef Eigen::Tensor<float,3,Eigen::RowMajor> fmat3;
 typedef Eigen::Tensor<double,3,Eigen::RowMajor> dmat3;
 typedef Eigen::Array<int,-1,-1,Eigen::RowMajor> imat2;

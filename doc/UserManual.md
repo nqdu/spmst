@@ -45,7 +45,7 @@ name | version|
 |:---:|:----:|  
 |[GCC](https://gcc.gnu.org/)| >=7.5|
 |[Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) | >=3.4.0 | 
-|[CMAKE](https://cmake.org/) | >=3.12.0|
+|[CMAKE](https://cmake.org/) | >=3.20.0|
 
 Optional:
 name |version |
@@ -63,6 +63,8 @@ cmake .. -DCXX=g++ -DFC=gfortran -DEIGEN_INC=/path/to/EIGEN
 make -j8
 ```
 Then all the programs will be put under the directory `bin`.
+
+You can optionally pass `-DSPMST_NPT_AUX=<n>` to `cmake` to adjust the number of auxiliary nodes along each edge of an SPM element, used by the shortest-path method to discretize the wavefront on each cell (default `9`). A larger value gives a more accurate (but slower) forward simulation; it must be an odd integer `>= 9`. You normally don't need to change this unless you are doing convergence/accuracy testing.
 
 # 3. File Format
 All 3 programs are highly dependent on several input files: topography file, source/receivers file, and the 2D/3D velocity file. Before we go through details in each program, we talk a little bit about the file format:
@@ -98,7 +100,6 @@ here is the template:
 40 40
 89.200000 90.300000
 38.900000 39.300000
-1
 3.000000
 3.000000
 3.000000
@@ -108,16 +109,17 @@ here is the template:
 ```
 - The first two numbers are number of points in `x/y` dimension, respectively
 - The 2nd/3rd line are minimum/maximum coordinates for `x/y` direction (in km or degree). 
-- The fourth line is a flag that enables the spherical coordinate system; if set to 1, spherical coordinates will be used.
 - The following lines are the velocities at each point (in km/s). The order of for loop is same as the topography file.
 
+This file never carries a spherical-coordinate flag. For `tomo2d`, the coordinate system (spherical or cartesian) is controlled by `SPHERICAL` in the [inversion parameter file](#36-inverse-problem-file); for `syn2d`, it's controlled by the optional `use_sph` command-line argument, see [syn2d usage](#41-syn2d).
+
 ## 3.3 3D velocity file
-here is the template:
+here is the template (used by `tomo3d`):
 ```
 33 36 27
 99.700000 110.200000
 25.700000 35.300000
-0 0
+0
 0.000000 0.400000 0.800000 1.200000 1.600000 2.000000 2.400000 2.800000 3.200000 3.600000 4.000000 4.400000 4.800000 5.200000 5.600000 6.000000 6.400000 6.800000 7.200000 7.600000 8.000000 8.400000 8.800000 9.200000 9.600000 15.000000 35.000000 
 2.800000
 2.800000
@@ -129,9 +131,8 @@ here is the template:
 ```
 - The first two numbers are number of points in `x/y/z` dimension, respectively
 - The 2nd/3rd line are minimum/maximum coordinates for `x/y` direction. 
-- The two numbers in fourth line:
-    * `Spherical coordinates flag`, same as 2D case
-    * `Shift interface flag`. If it is set to 0, the topography will be processed as the thickening/thinning of the first layer. Otherwise the location of all interface will be shifted up/downward but the relative location is not changed. I `strongly recommend` you to set this flag to 0 unless you really know what you are doing.  
+- The fourth line is the `Shift interface flag`. If it is set to 0, the topography will be processed as the thickening/thinning of the first layer. Otherwise the location of all interface will be shifted up/downward but the relative location is not changed. I `strongly recommend` you to set this flag to 0 unless you really know what you are doing.
+- The coordinate system (spherical or cartesian) is controlled by `SPHERICAL` in the [inversion parameter file](#36-inverse-problem-file), not in this file.
 - The 5-th line are the depth for each point (in km).
 - The following lines are the velocities at each point (in km/s), it should be written as:
 ```python
@@ -202,6 +203,9 @@ ITER_CURRENT = 0 # current iteration
 MIN_VELOC =  2.0
 MAX_VELOC = 5.0 
 
+# coordinate system
+SPHERICAL = 1                # 1 for spherical coordinates, 0 for cartesian
+
 # synthetic test
 SYN_TEST = 1                # synthetic flag(0:real data,1:synthetic)
 NOISE_LEVEL = 0.1          #  noise level, std value of gaussian noise
@@ -217,12 +221,13 @@ This is a self-explanatory file, you can add any comments in it (start with `#`)
 ## 4.1 `syn2d`
 This program is to synthesize frequency-dependent phase velocity travel time for a given 2-D velocity, topography and source-receiver pair. 
 ```code
-Usage: ./syn2d veloc2d.txt surfdata.txt topo.txt 
+Usage: ./syn2d veloc2d.txt surfdata.txt topo.txt [use_sph=1]
 ```
 Input files:
 - `veloc2d.txt` [2D velocity file](#32-2d-velcity-file).
 - `surfdata.txt` [source receiver pair](#34-2d-observation-file). This program only support `1` source/receiver pair.
 - `topo.txt` [Topography file](#31-topography-file).
+- `use_sph` (optional) spherical coordinate flag (`1` for spherical, `0` for cartesian); defaults to `1` if omitted.
 
 Output files:
 - `ray.dat` ray-paths for this source/receiver pair. It can be used directly by `gmt plot`.

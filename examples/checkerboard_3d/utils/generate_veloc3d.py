@@ -9,7 +9,6 @@ nlevelx = 0.6
 nlevely = 0.6
 nlevelz = 0.6
 zstr = "0.0 0.4 0.8 1.2 1.6 2.0 2.4 2.8 3.2 3.6 4.0 4.4 4.8 5.2 5.6 6 6.4 6.8 7.2 7.6 8 8.4 8.8 9.2 9.6 15 35"
-use_sph = False
 shift_depth = False
 
 # write velocity
@@ -22,7 +21,7 @@ for i in range(nz):
 f = open("velocinit.in","w")
 f.write("%d %d %d\n" %(nlon,nlat,nz))
 f.write("%f %f\n%f %f\n" %(xmin,xmax,ymin,ymax))
-f.write("%d %d\n" %(use_sph,shift_depth))
+f.write("%d\n" %(shift_depth))
 for i in range(nz):
     f.write("%f " %(z[i]))
 f.write("\n")
@@ -57,7 +56,7 @@ plt.savefig("veloc3d.jpg")
 f = open("veloctrue.in","w")
 f.write("%d %d\n" %(nlon,nlat))
 f.write("%f %f\n%f %f\n" %(xmin,xmax,ymin,ymax))
-f.write("%d %d\n" %(use_sph,shift_depth))
+f.write("%d\n" %(shift_depth))
 for i in range(nz):
     f.write("%f " %(z[i]))
 f.write("\n")

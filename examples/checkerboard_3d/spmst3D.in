@@ -6,7 +6,10 @@ ITER_CURRENT = 0 # current iteration
 
 #  minimum velocity, maximum velocity in km/s
 MIN_VELOC =  2.0
-MAX_VELOC = 5.0 
+MAX_VELOC = 5.0
+
+# coordinate system
+SPHERICAL = 0                # 1 for spherical coordinates, 0 for cartesian
 
 # synthetic test
 SYN_TEST = 1                # synthetic flag(0:real data,1:synthetic)

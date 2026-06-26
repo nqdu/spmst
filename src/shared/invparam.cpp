@@ -18,6 +18,9 @@ read_file(const char* paramfile) {
     read_par_regex("MIN_VELOC",minvel,infile);
     read_par_regex("MAX_VELOC",maxvel,infile);
 
+    // coordinate system
+    read_par_regex("SPHERICAL",is_spherical,infile);
+
     // read inv params based on inv_method
     read_par_regex("SMOOTH",smooth,infile);
     read_par_regex("DAMP",damp,infile);
@@ -35,6 +38,12 @@ read_file(const char* paramfile) {
     printf("Min amd max velocity(km/s) = %f, %f\n",minvel,maxvel);
     printf("Max iterations = %d\n",maxiter);
     printf("current model = %d\n",iter_cur);
+    if(is_spherical) {
+        printf("using spherical coordinates ...\n");
+    }
+    else {
+        printf("using cartesian coordinates ...\n");
+    }
 
     printf("use LSQR solver: ");
     printf("Number of Threads Used = %d\n",nthreads);
