@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <vector>
 
 #include "clsqr2/cblas.hpp"
 #include "clsqr2/aprod.hpp"
@@ -510,8 +511,16 @@ void lsqr(
     char fmt_3000[] =
         " %s       %s\n";
 
-//  Initialize.
-    real_t u[m], v[n], w[n],se[n];
+    //  Initialize.
+    // use std::vector to avoid memory leak
+    std::vector<real_t> u_store(m),
+                          v_store(n),
+                          w_store(n),
+                          se_store(n);
+    real_t *u = u_store.data(),
+           *v = v_store.data(),
+           *w = w_store.data(),
+           *se = se_store.data();
     FILE *nout = (FILE*)filestream;
     for(int i=0;i<m;i++) u[i] = b[i];
     if (nout != NULL)

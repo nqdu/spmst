@@ -4,13 +4,27 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${HOME}/software/eigen-3.4.0"
+                "${HOME}/software/eigen-5.0.0"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
+        },
+
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${HOME}/software/eigen-5.0.0",
+                "/opt/homebrew/opt/libomp/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "macos-clang-x64"
         }
     ],
     "version": 4
