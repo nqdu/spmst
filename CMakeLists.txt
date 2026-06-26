@@ -24,6 +24,9 @@ endmacro()
 setDefault(EIGEN_INC   "~/software/eigen-5.0.0")
 setDefault(SPMST_NPT_AUX 9)
 
+# option to build unit tests with GoogleTest
+option(ENABLE_TEST "Build unit tests with GoogleTest" OFF)
+
 # project
 project(SPMTOMO LANGUAGES CXX Fortran)
 
@@ -53,6 +56,20 @@ endif()
 add_definitions(-DSPMST_NPT_AUX=${SPMST_NPT_AUX})
 
 set(CMAKE_VERBOSE_MAKEFILE off)
+
+################# unit tests #################
+if(ENABLE_TEST)
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP true
+  )
+  # keep googletest's own runtime settings from overriding ours
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(googletest)
+  enable_testing()
+endif()
 
 ################# find packages #################
 # path of *.cmake files
@@ -88,3 +105,8 @@ add_executable(tomo2d ${PROJECT_SOURCE_DIR}/src/spmst2D/main.cpp)
 target_link_libraries(tomo3d spmst3D spm2d swd share lsqr OpenMP::OpenMP_CXX)
 target_link_libraries(syn2d spm2d share lsqr OpenMP::OpenMP_CXX)
 target_link_libraries(tomo2d spmst2D spm2d swd share lsqr OpenMP::OpenMP_CXX)
+
+# unit tests
+if(ENABLE_TEST)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+endif()

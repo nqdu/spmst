@@ -31,7 +31,7 @@ jobs:
           CXX: g++
           FC: gfortran
           CXXFLAGS: ""
-        run: cmake -S . -B build -DEIGEN_INC=${{ github.workspace }}/eigen-5.0.0
+        run: cmake -S . -B build -DEIGEN_INC=${{ github.workspace }}/eigen-5.0.0 -DENABLE_TEST=ON
 
       - name: Build
         run: cmake --build build -j$(nproc)
@@ -41,3 +41,6 @@ jobs:
           test -x bin/syn2d
           test -x bin/tomo2d
           test -x bin/tomo3d
+
+      - name: Run unit tests
+        run: ctest --test-dir build --output-on-failure
