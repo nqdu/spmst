@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main, devel]
+  pull_request:
+    branches: [main, devel]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ gfortran cmake
+
+      - name: Download Eigen
+        env:
+          EIGEN_VERSION: "5.0.0"
+        run: |
+          curl -L -o eigen.tar.gz "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz"
+          tar -xzf eigen.tar.gz
+
+      - name: Configure
+        env:
+          CXX: g++
+          FC: gfortran
+          CXXFLAGS: ""
+        run: cmake -S . -B build -DEIGEN_INC=${{ github.workspace }}/eigen-5.0.0 -DENABLE_TEST=ON
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Check executables
+        run: |
+          test -x bin/syn2d
+          test -x bin/tomo2d
+          test -x bin/tomo3d
+
+      - name: Run unit tests
+        run: ctest --test-dir build --output-on-failure

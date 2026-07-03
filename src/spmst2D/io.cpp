@@ -12,7 +12,7 @@ float SPMST2D::
 compute_distance(float x0,float y0,float x1,float y1) const
 {
     float dist{};
-    if(is_spherical){
+    if(param.is_spherical){
         dist = gps2dist(x0,x1,y0,y1,earth);
     }
     else{

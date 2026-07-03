@@ -59,8 +59,9 @@ read_binary(const char *filename)
         nar1 += nar;
         
         // read temporay 
-        float tmp[nar * 2];
+        float *tmp = new float[nar * 2];
         fp.read((char*)tmp,sizeof(float)*nar*2);
+        delete [] tmp;
     }
     fp.close();
 
@@ -99,7 +100,7 @@ write_binary(const char *filename) const
         fp.write((char*)&i,sizeof(int));
         fp.write((char*)&nonzeros,sizeof(int));
         fp.write((char*)(indices + start),sizeof(int)*nonzeros);
-        fp.write((char*)(data + start),sizeof(int)*nonzeros);
+        fp.write((char*)(data + start),sizeof(float)*nonzeros);
     }
 
     fp.close();

@@ -7,8 +7,9 @@ public:
     int maxiter; // maxiteration
     int ifsyn; // if or not do checkerboard test
     int iter_cur; // current iteration number (start from 0)
+    bool is_spherical; // if use spherical coordinates
 
-    // lsmr
+    // lsqr
     float smooth,damp; // parameters for lsmr
     int nthreads;
 

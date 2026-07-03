@@ -13,20 +13,20 @@
  * @return  # of unique points
  */
 static int
-get_unique(const float* __restrict x, const float* __restrict z, 
+get_unique(const double* __restrict x, const double* __restrict z, 
            int* __restrict index, int n)
 {
     // get min and max value
-    float xmin = x[0],xmax = x[0];
-    float zmin = z[0],zmax = z[0];
+    double xmin = x[0],xmax = x[0];
+    double zmin = z[0],zmax = z[0];
     for(int i = 1 ; i < n; i++){
         xmin = std::min(xmin,x[i]); xmax = std::max(xmax,x[i]);
         zmin = std::min(zmin,z[i]); zmax = std::max(zmax,z[i]);
     }
 
     // tolerance
-    double xtol = 1.0e-4 * (xmax - xmin);
-    double ztol = 1.0e-4 * (zmax - zmin);
+    double xtol = 1.0e-6 * (xmax - xmin);
+    double ztol = 1.0e-6 * (zmax - zmin);
 
     int nc = 0;
     for(int i = 0; i < n; i ++)index[i] = -1;
@@ -206,8 +206,8 @@ get_velocity(float lon,float lat,const fmat2 &veloc_ex) const
     return out;
 }
 
-SPM2DMesh:: 
-SPM2DMesh(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph)
+SPM2DMesh::
+SPM2DMesh(double lonmin,double latmin, double dlon, double dlat,int nlon,int nlat,bool sph)
 {
     this-> initialize(lonmin,latmin,dlon,dlat,nlon,nlat,sph);
 }
@@ -222,7 +222,7 @@ SPM2DMesh(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bo
  * @param sph = true if it is spherical coordinates
  */
 void SPM2DMesh::
-initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph)
+initialize(double lonmin,double latmin, double dlon, double dlat,int nlon,int nlat,bool sph)
 {
     // allocate space
     nelemx = nlon; nelemy = nlat;
@@ -231,12 +231,12 @@ initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,b
     XMIN = lonmin; YMIN = latmin; DX = dlon; DY = dlat;
 
     // allocate space for lon/lat and compute coordinates
-    fmat2 xmesh(nelmnts,NPT2), ymesh(nelmnts,NPT2);
+    dmat2 xmesh(nelmnts,NPT2), ymesh(nelmnts,NPT2);
     for(int ielemy = 0; ielemy < nelemy; ielemy++){
     for(int ielemx = 0; ielemx < nelemx; ielemx++){
         // get lower left coordinates 
-        float x = XMIN + DX * ielemx;
-        float y = YMIN + DY * ielemy;
+        double x = XMIN + DX * ielemx;
+        double y = YMIN + DY * ielemy;
         int ielem = ielemy * nelemx + ielemx;
 
         // get coordinates for 4 anchor points

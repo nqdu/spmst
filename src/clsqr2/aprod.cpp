@@ -69,27 +69,13 @@ void aprod2(int m,int n,real_t* __restrict x,const real_t* y,
     }
     omp_set_num_threads(nproc);
 
-    // allocate space 
-    real_t *xtmp = new real_t[nproc * n]();
-
-    // compute
-    #pragma omp parallel for shared(xtmp)
-    for(int irank = 0; irank < nproc; irank ++) {
-        for(int i = irank; i < n; i += nproc) {
-        for(int j = indptr[i]; j < indptr[i+1]; j ++ ) {
-            xtmp[irank * n + indices[j]] += val[j] * y[i];
-        }}
-    }
-
-    // copy to local
-    for(int i = 0; i < n; i ++) {
-        double s = 0.;
-        for(int irank = 0; irank < nproc; irank ++) {
-            s += xtmp[irank * n + i];
-        }
-        x[i] += s;
-    }
-    delete[] xtmp;
+    // atomic add 
+    #pragma omp parallel for shared(indptr,indices,x,y,val)
+    for(int i = 0; i < m;i++) {
+    for(int j = indptr[i]; j < indptr[i+1]; j++) {
+        #pragma omp atomic
+        x[indices[j]] += val[j] * y[i];
+    }}
 
     // set global nprocs back
     omp_set_num_threads(nproc_bak);

@@ -1,6 +1,7 @@
 #include "SWD/swd.hpp"
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 /**
  * convert phase/group velocity of flat earth to that of spherical earth. 
@@ -137,17 +138,18 @@ void groupvel_l(const float *thk,const float *vs,const float *rho,
     int iflsph = 0; if(sphere == true) iflsph = 1;
 
     // temporay arrays
-    float vp[nlayer];
-    double cp[kmax],uu[nlayer],tt[nlayer],dcdh[nlayer],
-            dcdr[nlayer],dcdb[nlayer];
+    std::vector<float> vp(nlayer);
+    std::vector<double> cp(kmax),uu(nlayer),tt(nlayer),dcdh(nlayer),
+            dcdr(nlayer),dcdb(nlayer);
 
     // compute phase velocity
     for(int i=0;i<nlayer;i++) vp[i] = 1.732 * vs[i];
-    surfdisp(thk,vp,vs,rho,nlayer,t,cp,kmax,"Lc",mode,sphere,true);
+    surfdisp(thk,vp.data(),vs,rho,nlayer,t,cp.data(),kmax,"Lc",mode,sphere,true);
 
     // convert phase to group velocity
     for(int i=0;i<kmax;i++){
-        slegn96_(thk,vs,rho,nlayer,&t[i],cp+i,cg+i,uu,tt,dcdb,dcdh,dcdr,iflsph);
+        slegn96_(thk,vs,rho,nlayer,&t[i],cp.data()+i,cg+i,uu.data(),tt.data(),
+                dcdb.data(),dcdh.data(),dcdr.data(),iflsph);
     }
 }
 
@@ -167,15 +169,16 @@ void groupvel_r(const float *thk,const float *vp,const float *vs,
     int iflsph = 0; if(sphere == true) iflsph = 1;
 
     // temporay arrays
-    double cp[kmax],ur[nlayer],uz[nlayer],tr[nlayer],tz[nlayer],
-            dcdh[nlayer],dcda[nlayer],dcdr[nlayer],dcdb[nlayer];
+    std::vector<double> cp(kmax),ur(nlayer),uz(nlayer),tr(nlayer),tz(nlayer),
+            dcdh(nlayer),dcda(nlayer),dcdr(nlayer),dcdb(nlayer);
 
     // compute phase velocity
-    surfdisp(thk,vp,vs,rho,nlayer,t,cp,kmax,"Rc",mode,sphere,true);
+    surfdisp(thk,vp,vs,rho,nlayer,t,cp.data(),kmax,"Rc",mode,sphere,true);
 
     // convert phase to group velocity
     for(int i=0;i<kmax;i++){
-        sregn96_(thk,vp,vs,rho,nlayer,t+i,cp+i,cg+i,
-                ur,uz,tr,tz,dcda,dcdb,dcdh,dcdr,iflsph);
+        sregn96_(thk,vp,vs,rho,nlayer,t+i,cp.data()+i,cg+i,
+                ur.data(),uz.data(),tr.data(),tz.data(),dcda.data(),
+                dcdb.data(),dcdh.data(),dcdr.data(),iflsph);
     }
 }

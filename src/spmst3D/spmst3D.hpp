@@ -22,8 +22,7 @@ public:
     std::vector<StationPair> stapairs; //  event-stations pairs
     fvec tobs; // travel time data in total
     SPM2DMesh mesh; // spm mesh
-    InverseParamsBase param; // parameters for 
-    bool is_spherical; // if use spherical coordinates
+    InverseParamsBase param; // parameters for
     bool shift_depth; // shift depth if required
 
     // period vector

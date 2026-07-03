@@ -3,9 +3,16 @@
 
 #include "numerical.hpp"
 
-const int NPTX = 13,NPTZ = 13;
+// use compiler flags to determine NPTX and NPTZ
+#ifdef SPMST_NPT_AUX 
+const int NPT_AUX_ = SPMST_NPT_AUX;
+#else
+const int NPT_AUX_ = 9;
+#endif
+const int NPTX = NPT_AUX_,NPTZ = NPTX;
 const int NPT2 = NPTX*2 + NPTZ*2 -4; // # of auxiliary nodes in x and z direction
 const float earth = 6371.0;
+
 
 class SPM2DMesh {
 public:
@@ -15,7 +22,7 @@ public:
     imat2 ibool; // connectivity matrix shape(nelemx*nelemz,NPT2)
     fvec xstore,ystore,zstore; // x,y and z coordinates, shape(nptstot)
     fmat2 veloc; // velocity of each node shape(nelmnts,NPT2)
-    float XMIN,YMIN,DX,DY; // mesh info lon and lat min and the size of each element
+    double XMIN,YMIN,DX,DY; // mesh info lon and lat min and the size of each element
 
     // csr graph 
     std::vector<int> xadj; // shape (nptstot)
@@ -34,9 +41,9 @@ private:
 public:
 
     SPM2DMesh() {};
-    SPM2DMesh(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph=true);
+    SPM2DMesh(double lonmin,double latmin, double dlon, double dlat,int nlon,int nlat,bool sph=true);
     void create_graph(bool has_discon = false);
-    void initialize(float lonmin,float latmin, float dlon, float dlat,int nlon,int nlat,bool sph=true);
+    void initialize(double lonmin,double latmin, double dlon, double dlat,int nlon,int nlat,bool sph=true);
     void read_topography(const char *filename);
     void set_velocity(const float* lon, const float* lat,
                      const float* veloc_in,int nlon,int nlat);

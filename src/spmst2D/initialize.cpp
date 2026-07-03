@@ -109,11 +109,10 @@ read_model(const char *filename,fmat2 &veloc_in,bool init_mesh)
 
     // read model dimension
     int nlat,nlon;
-    float lonmin,lonmax,latmin,latmax;
+    double lonmin,lonmax,latmin,latmax;
     read_file_param(fp,nlon,nlat);
     read_file_param(fp,lonmin,lonmax);
     read_file_param(fp,latmin,latmax);
-    read_file_param(fp,is_spherical);
 
     // create lon/lat vector
     model_lat.resize(nlat); model_lon.resize(nlon);
@@ -127,7 +126,7 @@ read_model(const char *filename,fmat2 &veloc_in,bool init_mesh)
     // print information
     if(init_mesh) {
         printf("\nVelocity Model Information:\n");
-        if(is_spherical){
+        if(param.is_spherical){
             printf("using spherical coordinates ...\n");
             printf("lonmin = %f lonmax = %f\n",lonmin,lonmax);
             printf("latmin = %f latmax = %f\n",latmin,latmax);
@@ -156,9 +155,9 @@ read_model(const char *filename,fmat2 &veloc_in,bool init_mesh)
         const int nrefine = 2;
         int nlonr = (nlon - 1) * nrefine;
         int nlatr = (nlat - 1) * nrefine;
-        float dlonr = (lonmax - lonmin) / nlonr;
-        float dlatr = (latmax - latmin) / nlatr;
-        mesh.initialize(lonmin,latmin,dlonr,dlatr,nlonr,nlatr,is_spherical);
+        double dlonr = (lonmax - lonmin) / nlonr;
+        double dlatr = (latmax - latmin) / nlatr;
+        mesh.initialize(lonmin,latmin,dlonr,dlatr,nlonr,nlatr,param.is_spherical);
         mesh.create_graph(false);
     }
 }
